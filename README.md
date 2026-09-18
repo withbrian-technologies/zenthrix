@@ -14,6 +14,7 @@
 - [Architectural Focus](#architectural-focus)
 - [Supported Execution Backends](#supported-execution-backends)
 - [Testing & Benchmarking Kernels](#testing--benchmarking-kernels)
+- [Portable Kernel ABI](docs/KERNEL_ABI.md)
 - [Repository Layout](#repository-layout)
 - [Acquisition Due Diligence Requirements](#acquisition-due-diligence-requirements)
 
@@ -38,60 +39,45 @@
 
 ## Testing & Benchmarking Kernels
 
+The portable ABI and registry can be built and tested without vendor SDKs or
+hardware:
+
+```bash
+cmake -S . -B build -G Ninja -DENABLE_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
 Hardware execution tests require physical target devices, configured via ADB (for Android/Qualcomm) or native execution on macOS (for Apple Silicon).
 
 ### Executing Metal Kernel Benchmarks (Apple Silicon)
 
-```bash
-mkdir build && cd build
-cmake -G Ninja -DZENTHRIX_TARGET_APPLE=ON ..
-ninja
-./bin/test_metal_throughput
-```
+Metal benchmarks are not available in the portable build yet. They require a
+macOS/Xcode toolchain and physical Apple Silicon hardware.
 
 ## Repository Layout
 
 ```
 zenthrix-kernels/
 ├── docs/
-│   ├── APPLE_AMX_INTERNAL.md
-│   └── QUALCOMM_HEXAGON_HTP.md
-├── targets/
-│   ├── apple/
-│   │   ├── include/
-│   │   │   ├── metal_runtime.h
-│   │   │   └── amx_intrinsics.h
-│   │   ├── src/
-│   │   │   ├── metal_runtime.mm
-│   │   │   ├── amx_gemm.s
-│   │   │   └── shaders/
-│   │   │       ├── fused_attention.metal
-│   │   │       ├── rms_norm.metal
-│   │   │       └── quant_dequant.metal
-│   │   └── tests/
-│   │       └── test_metal_throughput.mm
-│   ├── qualcomm/
-│   │   ├── include/
-│   │   │   ├── hexagon_runtime.h
-│   │   │   └── htp_interface.h
-│   │   ├── src/
-│   │   │   ├── hexagon_runtime.cpp
-│   │   │   └── htp_kernels/
-│   │   │       ├── qnn_quant_matmul.cpp
-│   │   │       └── fused_activations.cpp
-│   │   └── tests/
-│   │       └── test_hexagon_execution.cpp
-│   └── common/
-│       ├── include/
-│       │   ├── kernel_interface.h
-│       │   └── memory_barriers.h
-│       └── src/
-│           └── kernel_registry.cpp
-├── .clang-format
+│   └── KERNEL_ABI.md
+├── include/zenthrix/kernels/
+│   ├── backend_seams.h
+│   ├── kernel_abi.h
+│   └── kernel_registry.h
+├── src/common/
+│   ├── backend_seams.cpp
+│   └── kernel_registry.cpp
+├── tests/unit/
+│   └── test_registry.cpp
 ├── .gitignore
 ├── CMakeLists.txt
 └── README.md
 ```
+
+The Apple and Qualcomm target directories described above are future
+platform-specific additions; the current portable target intentionally has no
+vendor SDK dependency.
 
 ## Acquisition Due Diligence Requirements
 
