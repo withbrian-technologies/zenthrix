@@ -1,4 +1,5 @@
 #include <cassert>
+#include <limits>
 
 #include "zenthrix/kernels/backend_seams.h"
 #include "zenthrix/kernels/kernel_registry.h"
@@ -10,6 +11,17 @@ int main() {
   assert(validate(descriptor).ok());
   const TensorDescriptor invalid{DataType::i8, {2, 4}, {4}, 8};
   assert(validate(invalid).code == StatusCode::invalid_descriptor);
+  const TensorDescriptor invalid_stride{DataType::f32, {2, 4}, {100, 1}, 32};
+  assert(validate(invalid_stride).code == StatusCode::invalid_descriptor);
+  const TensorDescriptor invalid_type{static_cast<DataType>(99), {1}, {1}, 0};
+  assert(validate(invalid_type).code == StatusCode::invalid_descriptor);
+  const auto maximum = std::numeric_limits<std::size_t>::max();
+  const TensorDescriptor overflowing_shape{DataType::f32, {maximum, 2}, {2, 1},
+                                           maximum};
+  assert(validate(overflowing_shape).code == StatusCode::invalid_descriptor);
+  const TensorDescriptor overflowing_span{DataType::f32, {maximum}, {2},
+                                          maximum};
+  assert(validate(overflowing_span).code == StatusCode::invalid_descriptor);
 
   KernelRegistry registry;
   const KernelDescriptor kernel{

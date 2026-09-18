@@ -1,6 +1,7 @@
 #include "zenthrix/kernels/kernel_registry.h"
 
 #include <algorithm>
+#include <limits>
 #include <numeric>
 
 namespace zenthrix::kernels {
@@ -32,12 +33,33 @@ Status validate(const TensorDescriptor& descriptor) {
                   [](const auto dimension) { return dimension == 0; })) {
     return {StatusCode::invalid_descriptor, "tensor dimensions must be non-zero"};
   }
-  std::size_t elements = 1;
-  for (const auto dimension : descriptor.shape) {
-    elements *= dimension;
+  const auto bytes = element_size(descriptor.type);
+  if (bytes == 0) {
+    return {StatusCode::invalid_descriptor, "unsupported data type"};
   }
-  if (descriptor.byte_size != elements * element_size(descriptor.type)) {
-    return {StatusCode::invalid_descriptor, "byte_size does not match shape"};
+  std::size_t elements = 1;
+  std::size_t span_elements = 1;
+  for (std::size_t index = 0; index < descriptor.shape.size(); ++index) {
+    const auto dimension = descriptor.shape[index];
+    if (elements > std::numeric_limits<std::size_t>::max() / dimension) {
+      return {StatusCode::invalid_descriptor, "tensor shape overflows size_t"};
+    }
+    elements *= dimension;
+    const auto stride = descriptor.strides[index];
+    if (stride != 0 &&
+        dimension - 1 >
+            (std::numeric_limits<std::size_t>::max() - span_elements) /
+                stride) {
+      return {StatusCode::invalid_descriptor, "tensor strides overflow size_t"};
+    }
+    span_elements += (dimension - 1) * stride;
+  }
+  if (span_elements > std::numeric_limits<std::size_t>::max() / bytes) {
+    return {StatusCode::invalid_descriptor, "tensor span overflows size_t"};
+  }
+  if (descriptor.byte_size < span_elements * bytes) {
+    return {StatusCode::invalid_descriptor,
+            "byte_size is smaller than the strided tensor span"};
   }
   return {StatusCode::ok, ""};
 }
