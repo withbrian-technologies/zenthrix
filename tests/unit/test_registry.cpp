@@ -34,6 +34,14 @@ int main() {
   assert(found.name == kernel.name);
   assert(registry.entries().size() == 1);
 
+  const KernelKey invalid_key{static_cast<Operation>(99), DataType::f32,
+                              Backend::cpu_reference};
+  assert(validate(invalid_key).code == StatusCode::invalid_descriptor);
+  assert(registry.register_kernel({invalid_key, "invalid"}).code ==
+         StatusCode::invalid_descriptor);
+  assert(registry.lookup(invalid_key, found).code ==
+         StatusCode::invalid_descriptor);
+
   const KernelKey missing{Operation::rms_norm, DataType::f32,
                           Backend::cpu_reference};
   assert(registry.lookup(missing, found).code == StatusCode::kernel_not_found);

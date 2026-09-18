@@ -64,6 +64,34 @@ Status validate(const TensorDescriptor& descriptor) {
   return {StatusCode::ok, ""};
 }
 
+Status validate(const KernelKey& key) {
+  switch (key.operation) {
+    case Operation::matmul:
+    case Operation::rms_norm:
+    case Operation::fused_attention:
+      break;
+    default:
+      return {StatusCode::invalid_descriptor, "unsupported kernel operation"};
+  }
+  switch (key.type) {
+    case DataType::f16:
+    case DataType::f32:
+    case DataType::i8:
+    case DataType::i32:
+      break;
+    default:
+      return {StatusCode::invalid_descriptor, "unsupported kernel data type"};
+  }
+  switch (key.backend) {
+    case Backend::cpu_reference:
+    case Backend::apple_metal:
+    case Backend::qualcomm_hexagon:
+      return {StatusCode::ok, ""};
+    default:
+      return {StatusCode::invalid_descriptor, "unsupported kernel backend"};
+  }
+}
+
 const char* backend_name(const Backend backend) noexcept {
   switch (backend) {
     case Backend::cpu_reference:
@@ -80,6 +108,10 @@ Status KernelRegistry::register_kernel(KernelDescriptor descriptor) {
   if (descriptor.name.empty()) {
     return {StatusCode::invalid_descriptor, "kernel name must not be empty"};
   }
+  const auto key_status = validate(descriptor.key);
+  if (!key_status.ok()) {
+    return key_status;
+  }
   if (!kernels_.emplace(descriptor.key, descriptor).second) {
     return {StatusCode::duplicate_kernel, "kernel key is already registered"};
   }
@@ -88,6 +120,10 @@ Status KernelRegistry::register_kernel(KernelDescriptor descriptor) {
 
 Status KernelRegistry::lookup(const KernelKey& key,
                               KernelDescriptor& descriptor) const {
+  const auto key_status = validate(key);
+  if (!key_status.ok()) {
+    return key_status;
+  }
   const auto iterator = kernels_.find(key);
   if (iterator == kernels_.end()) {
     return {StatusCode::kernel_not_found, "kernel key was not registered"};

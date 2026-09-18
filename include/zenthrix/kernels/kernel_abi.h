@@ -41,6 +41,7 @@ struct KernelKey {
 };
 
 [[nodiscard]] Status validate(const TensorDescriptor& descriptor);
+[[nodiscard]] Status validate(const KernelKey& key);
 [[nodiscard]] const char* backend_name(Backend backend) noexcept;
 
 }  // namespace zenthrix::kernels

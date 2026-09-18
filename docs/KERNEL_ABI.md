@@ -8,6 +8,10 @@ The registry is deterministic and rejects duplicate keys. Apple Metal and
 Qualcomm Hexagon execution are separate seams; on unsupported builds they
 return `unsupported_backend` rather than claiming successful execution.
 
+Kernel keys are validated before registry insertion, lookup, or backend
+dispatch. Unknown operation, data type, and backend identifiers return
+`invalid_descriptor` rather than being treated as absent kernels.
+
 Strides are expressed in elements, not bytes. They may describe contiguous,
 strided, or broadcast dimensions; validation computes the highest addressed
 element and requires that its byte offset fits within `byte_size`. Shape and
