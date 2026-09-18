@@ -30,6 +30,13 @@ int main() {
   const auto output = graph.add_tensor(Tensor("output", DataType::f32, {1, 4}));
   graph.add_node(Node{"identity", "Identity", {input}, {output}});
   graph.mark_output(output);
+  bool duplicate_mark = false;
+  try {
+    graph.mark_output(output);
+  } catch (const std::invalid_argument&) {
+    duplicate_mark = true;
+  }
+  assert(duplicate_mark);
 
   assert(graph.tensor_count() == 2);
   assert(graph.node_count() == 1);
