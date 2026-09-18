@@ -143,6 +143,34 @@ int main() {
     return std::size_t{0};
   };
   assert(allocation_for(first_tensor) == allocation_for(final_tensor));
+  Graph early_output_graph;
+  const auto early_input = early_output_graph.add_tensor(
+      Tensor("early-input", DataType::f32, {1, 4}));
+  const auto early_output = early_output_graph.add_tensor(
+      Tensor("early-output", DataType::f32, {1, 4}));
+  const auto later_tensor = early_output_graph.add_tensor(
+      Tensor("later", DataType::f32, {1, 4}));
+  early_output_graph.add_node(
+      Node{"produce-output", "Identity", {early_input}, {early_output}});
+  early_output_graph.add_node(
+      Node{"produce-later", "Identity", {early_input}, {later_tensor}});
+  early_output_graph.mark_output(early_output);
+  const auto early_lifetimes = analyze_lifetimes(early_output_graph);
+  for (const auto& lifetime : early_lifetimes) {
+    if (lifetime.tensor_index == early_output) {
+      assert(lifetime.last_use == 2);
+    }
+  }
+  const auto early_plan = plan_memory(early_output_graph);
+  auto early_offset = [&early_plan](const std::size_t tensor_index) {
+    for (const auto& allocation : early_plan.allocations) {
+      if (allocation.tensor_index == tensor_index) {
+        return allocation.offset;
+      }
+    }
+    return std::size_t{0};
+  };
+  assert(early_offset(early_output) != early_offset(later_tensor));
   bool invalid_alignment = false;
   try {
     static_cast<void>(plan_memory(graph, 3));

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(zenthrix_core VERSION 0.1.2 LANGUAGES CXX)
+project(zenthrix_core VERSION 0.1.3 LANGUAGES CXX)
 
 option(ENABLE_TESTS "Build unit tests" ON)
 

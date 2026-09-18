@@ -44,6 +44,13 @@ std::vector<TensorLifetime> analyze_lifetimes(const core::Graph& graph) {
   for (const auto output : graph.outputs()) {
     if (!seen[output]) {
       lifetimes.push_back({output, order.size(), order.size()});
+    } else {
+      for (auto& lifetime : lifetimes) {
+        if (lifetime.tensor_index == output) {
+          lifetime.last_use = order.size();
+          break;
+        }
+      }
     }
   }
   return lifetimes;

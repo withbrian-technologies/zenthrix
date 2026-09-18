@@ -5,7 +5,7 @@ All notable changes to Zenthrix Core are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.3] - Unreleased
 
 ### Changed
 
@@ -13,6 +13,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Tensor construction now rejects unknown `DataType` enum values.
 - Memory planning now checks aligned offsets, allocation ends, and arena-size
   arithmetic for `size_t` overflow.
+- Graph outputs now remain live through the end of execution during lifetime
+  analysis and memory planning.
+- CMake project version is `0.1.3`.
 - Added regression coverage for oversized tensor shapes.
 
 ## [0.1.2] - 2026-09-18

@@ -4,6 +4,9 @@
 tensor referenced by a graph node or marked as a graph output. The analysis
 rejects invalid graphs and cyclic execution order.
 
+Marked graph outputs remain live through the end of execution so their arena
+storage cannot be reused before the compiled result is consumed.
+
 `plan_memory` uses those intervals to assign aligned offsets in a single arena.
 Intervals that no longer overlap may reuse space; active intervals are placed
 after the current occupied range. The result reports each tensor allocation
