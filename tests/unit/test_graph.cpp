@@ -48,6 +48,14 @@ int main() {
   }
   assert(cycle_detected);
 
+  Graph self_loop;
+  const auto loop_tensor =
+      self_loop.add_tensor(Tensor("loop", DataType::f32, {1}));
+  self_loop.add_node(Node{"loop", "Identity", {loop_tensor}, {loop_tensor}});
+  assert(!self_loop.validate());
+
+  assert(Tensor("byte", DataType::i8, {4}).byte_size() == 4);
+
   PassManager passes;
   passes.add(std::make_unique<ValidateGraphPass>());
   assert(passes.run(graph));

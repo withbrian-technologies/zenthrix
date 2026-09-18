@@ -49,6 +49,12 @@ bool Graph::validate() const noexcept {
     if (node.name.empty() || node.operation.empty() || node.outputs.empty()) {
       return false;
     }
+    for (const auto input : node.inputs) {
+      if (std::find(node.outputs.begin(), node.outputs.end(), input) !=
+          node.outputs.end()) {
+        return false;
+      }
+    }
     for (const auto tensor_index : node.inputs) {
       if (tensor_index >= tensors_.size()) {
         return false;

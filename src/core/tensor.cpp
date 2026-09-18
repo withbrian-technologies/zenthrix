@@ -27,7 +27,7 @@ std::size_t Tensor::element_count() const noexcept {
 
 std::size_t Tensor::byte_size() const noexcept {
   const std::size_t bytes_per_element =
-      type_ == DataType::f32 || type_ == DataType::i32 ? 4 : 2;
+      type_ == DataType::i8 ? 1 : (type_ == DataType::f16 ? 2 : 4);
   return element_count() * bytes_per_element;
 }
 
