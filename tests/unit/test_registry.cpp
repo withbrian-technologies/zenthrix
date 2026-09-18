@@ -43,6 +43,12 @@ int main() {
          "apple_rms_norm_f32");
   assert(registry.entries(Backend::qualcomm_hexagon).empty());
   assert(registry.entries(static_cast<Backend>(99)).empty());
+  std::vector<KernelDescriptor> filtered;
+  assert(registry.entries(Backend::apple_metal, filtered).ok());
+  assert(filtered.size() == 1);
+  assert(registry.entries(static_cast<Backend>(99), filtered).code ==
+         StatusCode::invalid_descriptor);
+  assert(filtered.empty());
 
   const KernelKey invalid_key{static_cast<Operation>(99), DataType::f32,
                               Backend::cpu_reference};

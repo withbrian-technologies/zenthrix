@@ -2,6 +2,18 @@
 
 All notable changes to `zenthrix-kernels` are documented here.
 
+## [0.1.2] - 2026-09-18
+
+### Added
+
+- Status-returning backend-filtered registry discovery for callers that need
+  to distinguish invalid backends from empty results.
+
+### Changed
+
+- Invalid backend discovery now clears output deterministically and reports
+  `invalid_descriptor`.
+
 ## [0.1.1] - 2026-09-18
 
 ### Added

@@ -158,16 +158,28 @@ std::vector<KernelDescriptor> KernelRegistry::entries() const {
 
 std::vector<KernelDescriptor> KernelRegistry::entries(
     const Backend backend) const {
-  if (backend_status(backend).code == StatusCode::invalid_descriptor) {
-    return {};
-  }
   std::vector<KernelDescriptor> result;
+  if (!entries(backend, result).ok()) {
+    result.clear();
+  }
+  return result;
+}
+
+Status KernelRegistry::entries(
+    const Backend backend, std::vector<KernelDescriptor>& result) const {
+  result.clear();
+  const auto status = validate(KernelKey{Operation::matmul, DataType::f32,
+                                         backend});
+  if (!status.ok()) {
+    return status;
+  }
+  result.reserve(kernels_.size());
   for (const auto& [key, descriptor] : kernels_) {
     if (key.backend == backend) {
       result.push_back(descriptor);
     }
   }
-  return result;
+  return {StatusCode::ok, ""};
 }
 
 }  // namespace zenthrix::kernels

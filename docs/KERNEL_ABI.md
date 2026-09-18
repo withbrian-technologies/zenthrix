@@ -20,7 +20,9 @@ built. Unknown backend values return `invalid_descriptor`.
 `KernelRegistry::entries(backend)` returns only descriptors for a validated
 backend in the same deterministic `KernelKey` order as `entries()`. An
 unknown backend produces an empty result and never matches a registered
-descriptor.
+descriptor. Callers that need diagnostics can use the status-returning
+`entries(backend, result)` overload; it returns `invalid_descriptor` for an
+unknown backend and clears the output.
 
 Strides are expressed in elements, not bytes. They may describe contiguous,
 strided, or broadcast dimensions; validation computes the highest addressed
