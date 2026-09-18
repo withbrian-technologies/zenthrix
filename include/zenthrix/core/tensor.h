@@ -19,6 +19,7 @@ class Tensor {
     return shape_;
   }
   [[nodiscard]] std::size_t element_count() const noexcept;
+  [[nodiscard]] std::size_t byte_size() const noexcept;
 
  private:
   std::string name_;

@@ -62,10 +62,12 @@ ninja
 ctest --output-on-failure -j$(nproc)
 ```
 
-The initial core implementation provides dependency-free tensor and graph IR
-primitives with deterministic structural validation and topological ordering
-with cycle detection. The pass manager currently provides a validation pass as
-the first compilation pipeline gate. Build and test it with:
+The current MVP provides dependency-free tensor and graph IR primitives,
+deterministic structural validation and topological ordering with cycle
+detection, a validation/dead-code-elimination pass pipeline, tensor lifetime
+analysis, and aligned arena planning. External dialect ingestion and native
+code generation remain explicit future integration seams. Build and test it
+with:
 
 ```bash
 cmake -S . -B build -G Ninja -DENABLE_TESTS=ON
