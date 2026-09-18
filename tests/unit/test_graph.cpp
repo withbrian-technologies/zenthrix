@@ -1,4 +1,5 @@
 #include <cassert>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -72,6 +73,14 @@ int main() {
   assert(!duplicate_producer.validate());
 
   assert(Tensor("byte", DataType::i8, {4}).byte_size() == 4);
+  bool tensor_overflow = false;
+  try {
+    static_cast<void>(Tensor("huge", DataType::f32,
+                             {std::numeric_limits<std::size_t>::max(), 2}));
+  } catch (const std::invalid_argument&) {
+    tensor_overflow = true;
+  }
+  assert(tensor_overflow);
 
   PassManager passes;
   passes.add(std::make_unique<ValidateGraphPass>());

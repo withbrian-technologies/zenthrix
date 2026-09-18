@@ -9,5 +9,10 @@ Intervals that no longer overlap may reuse space; active intervals are placed
 after the current occupied range. The result reports each tensor allocation
 and the peak arena size.
 
+Tensor shape and byte-size arithmetic is checked before planning. Alignment
+padding, allocation ends, and arena-size calculations are also overflow-safe;
+an unrepresentable plan raises `std::overflow_error` rather than returning
+wrapped offsets.
+
 Device-specific allocators, zero-copy bindings, and hardware memory domains
 remain future seams.

@@ -5,6 +5,15 @@ All notable changes to Zenthrix Core are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- Tensor construction now rejects shape and byte-size multiplication overflow.
+- Memory planning now checks aligned offsets, allocation ends, and arena-size
+  arithmetic for `size_t` overflow.
+- Added regression coverage for oversized tensor shapes.
+
 ## [0.1.2] - 2026-09-18
 
 ### Added

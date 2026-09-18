@@ -1,5 +1,6 @@
 #include "zenthrix/core/tensor.h"
 
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -14,6 +15,18 @@ Tensor::Tensor(std::string name, DataType type, std::vector<std::size_t> shape)
     if (dimension == 0) {
       throw std::invalid_argument("tensor dimensions must be non-zero");
     }
+  }
+  const auto bytes_per_element =
+      type_ == DataType::i8 ? 1 : (type_ == DataType::f16 ? 2 : 4);
+  std::size_t count = 1;
+  for (const auto dimension : shape_) {
+    if (count > std::numeric_limits<std::size_t>::max() / dimension) {
+      throw std::invalid_argument("tensor element count overflows size_t");
+    }
+    count *= dimension;
+  }
+  if (count > std::numeric_limits<std::size_t>::max() / bytes_per_element) {
+    throw std::invalid_argument("tensor byte size overflows size_t");
   }
 }
 
