@@ -12,6 +12,11 @@ Kernel keys are validated before registry insertion, lookup, or backend
 dispatch. Unknown operation, data type, and backend identifiers return
 `invalid_descriptor` rather than being treated as absent kernels.
 
+`backend_status()` reports capability without executing a kernel: the portable
+CPU reference backend returns `ok`, while Apple Metal and Qualcomm Hexagon
+return `unsupported_backend` until their platform-specific implementations are
+built. Unknown backend values return `invalid_descriptor`.
+
 Strides are expressed in elements, not bytes. They may describe contiguous,
 strided, or broadcast dimensions; validation computes the highest addressed
 element and requires that its byte offset fits within `byte_size`. Shape and

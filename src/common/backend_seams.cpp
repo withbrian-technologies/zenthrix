@@ -7,8 +7,11 @@ Status execute_apple(const KernelKey& key) {
   if (!key_status.ok()) {
     return key_status;
   }
-  return {StatusCode::unsupported_backend,
-          "Apple Metal backend requires a macOS/Metal build"};
+  if (key.backend != Backend::apple_metal) {
+    return {StatusCode::invalid_descriptor,
+            "Apple seam requires an Apple Metal kernel key"};
+  }
+  return backend_status(key.backend);
 }
 
 Status execute_qualcomm(const KernelKey& key) {
@@ -16,8 +19,11 @@ Status execute_qualcomm(const KernelKey& key) {
   if (!key_status.ok()) {
     return key_status;
   }
-  return {StatusCode::unsupported_backend,
-          "Qualcomm Hexagon backend requires the vendor SDK and target device"};
+  if (key.backend != Backend::qualcomm_hexagon) {
+    return {StatusCode::invalid_descriptor,
+            "Qualcomm seam requires a Hexagon kernel key"};
+  }
+  return backend_status(key.backend);
 }
 
 }  // namespace zenthrix::kernels

@@ -45,6 +45,19 @@ int main() {
   const KernelKey missing{Operation::rms_norm, DataType::f32,
                           Backend::cpu_reference};
   assert(registry.lookup(missing, found).code == StatusCode::kernel_not_found);
-  assert(execute_apple(kernel.key).code == StatusCode::unsupported_backend);
-  assert(execute_qualcomm(kernel.key).code == StatusCode::unsupported_backend);
+  assert(backend_status(Backend::cpu_reference).ok());
+  assert(backend_status(Backend::apple_metal).code ==
+         StatusCode::unsupported_backend);
+  assert(backend_status(Backend::qualcomm_hexagon).code ==
+         StatusCode::unsupported_backend);
+  assert(backend_status(static_cast<Backend>(99)).code ==
+         StatusCode::invalid_descriptor);
+  const KernelKey apple_key{Operation::matmul, DataType::f16,
+                            Backend::apple_metal};
+  const KernelKey qualcomm_key{Operation::matmul, DataType::f16,
+                               Backend::qualcomm_hexagon};
+  assert(execute_apple(apple_key).code == StatusCode::unsupported_backend);
+  assert(execute_qualcomm(qualcomm_key).code ==
+         StatusCode::unsupported_backend);
+  assert(execute_apple(kernel.key).code == StatusCode::invalid_descriptor);
 }

@@ -104,6 +104,21 @@ const char* backend_name(const Backend backend) noexcept {
   return "unknown";
 }
 
+Status backend_status(const Backend backend) {
+  switch (backend) {
+    case Backend::cpu_reference:
+      return {StatusCode::ok, "CPU reference backend is available"};
+    case Backend::apple_metal:
+      return {StatusCode::unsupported_backend,
+              "Apple Metal backend requires a macOS/Metal build"};
+    case Backend::qualcomm_hexagon:
+      return {StatusCode::unsupported_backend,
+              "Qualcomm Hexagon backend requires the vendor SDK and target "
+              "device"};
+  }
+  return {StatusCode::invalid_descriptor, "unsupported kernel backend"};
+}
+
 Status KernelRegistry::register_kernel(KernelDescriptor descriptor) {
   if (descriptor.name.empty()) {
     return {StatusCode::invalid_descriptor, "kernel name must not be empty"};
