@@ -79,4 +79,36 @@ int main() {
   assert(!lifetimes.empty());
   const auto plan = plan_memory(graph);
   assert(plan.arena_size >= graph.tensor(input).byte_size());
+  for (const auto& allocation : plan.allocations) {
+    assert(allocation.offset % 64 == 0);
+  }
+  Graph reuse_graph;
+  const auto first_tensor =
+      reuse_graph.add_tensor(Tensor("first", DataType::f32, {1, 4}));
+  const auto middle_tensor =
+      reuse_graph.add_tensor(Tensor("middle", DataType::f32, {1, 4}));
+  const auto final_tensor =
+      reuse_graph.add_tensor(Tensor("final", DataType::f32, {1, 4}));
+  reuse_graph.add_node(
+      Node{"first-pass", "Identity", {first_tensor}, {middle_tensor}});
+  reuse_graph.add_node(
+      Node{"second-pass", "Identity", {middle_tensor}, {final_tensor}});
+  reuse_graph.mark_output(final_tensor);
+  const auto reuse_plan = plan_memory(reuse_graph);
+  auto allocation_for = [&reuse_plan](const std::size_t tensor_index) {
+    for (const auto& allocation : reuse_plan.allocations) {
+      if (allocation.tensor_index == tensor_index) {
+        return allocation.offset;
+      }
+    }
+    return std::size_t{0};
+  };
+  assert(allocation_for(first_tensor) == allocation_for(final_tensor));
+  bool invalid_alignment = false;
+  try {
+    static_cast<void>(plan_memory(graph, 3));
+  } catch (const std::invalid_argument&) {
+    invalid_alignment = true;
+  }
+  assert(invalid_alignment);
 }

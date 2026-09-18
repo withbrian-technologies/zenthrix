@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <utility>
 
 namespace zenthrix::memory {
 
@@ -15,19 +16,36 @@ MemoryPlan plan_memory(const core::Graph& graph, const std::size_t alignment) {
     Allocation allocation;
     std::size_t last_use;
   };
+  std::vector<TensorLifetime> ordered_lifetimes = lifetimes;
+  std::sort(ordered_lifetimes.begin(), ordered_lifetimes.end(),
+            [](const auto& left, const auto& right) {
+              return std::pair{left.first_use, left.tensor_index} <
+                     std::pair{right.first_use, right.tensor_index};
+            });
   std::vector<Placed> placed;
-  for (const auto& lifetime : lifetimes) {
+  for (const auto& lifetime : ordered_lifetimes) {
     const auto size = graph.tensor(lifetime.tensor_index).byte_size();
     std::size_t offset = 0;
-    for (const auto& candidate : placed) {
-      if (candidate.last_use < lifetime.first_use) {
-        continue;
+    while (true) {
+      const auto aligned_end =
+          ((offset + size + alignment - 1) / alignment) * alignment;
+      bool conflict = false;
+      for (const auto& candidate : placed) {
+        if (candidate.last_use < lifetime.first_use ||
+            aligned_end <= candidate.allocation.offset ||
+            offset >= candidate.allocation.offset + candidate.allocation.size) {
+          continue;
+        }
+        offset = ((candidate.allocation.offset + candidate.allocation.size +
+                   alignment - 1) /
+                  alignment) *
+                 alignment;
+        conflict = true;
+        break;
       }
-      offset = std::max(
-          offset, ((candidate.allocation.offset + candidate.allocation.size +
-                    alignment - 1) /
-                alignment) *
-                alignment);
+      if (!conflict) {
+        break;
+      }
     }
     plan.allocations.push_back({lifetime.tensor_index, offset, size});
     placed.push_back({plan.allocations.back(), lifetime.last_use});
