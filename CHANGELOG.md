@@ -15,6 +15,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   arithmetic for `size_t` overflow.
 - Graph outputs now remain live through the end of execution during lifetime
   analysis and memory planning.
+- Graph output marking now rejects duplicate entries explicitly.
 - CMake project version is `0.1.3`.
 - Added regression coverage for oversized tensor shapes.
 

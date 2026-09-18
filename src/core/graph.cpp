@@ -23,10 +23,11 @@ void Graph::mark_output(const std::size_t tensor_index) {
   if (tensor_index >= tensors_.size()) {
     throw std::out_of_range("graph output tensor index out of range");
   }
-  if (std::find(outputs_.begin(), outputs_.end(), tensor_index) ==
+  if (std::find(outputs_.begin(), outputs_.end(), tensor_index) !=
       outputs_.end()) {
-    outputs_.push_back(tensor_index);
+    throw std::invalid_argument("graph output tensor is already marked");
   }
+  outputs_.push_back(tensor_index);
 }
 
 void Graph::remove_node(const std::size_t node_index) {
@@ -71,10 +72,15 @@ bool Graph::validate() const noexcept {
       produced[tensor_index] = true;
     }
   }
+  std::vector<bool> marked_output(tensors_.size(), false);
   for (const auto tensor_index : outputs_) {
     if (tensor_index >= tensors_.size()) {
       return false;
     }
+    if (marked_output[tensor_index]) {
+      return false;
+    }
+    marked_output[tensor_index] = true;
   }
   return true;
 }
