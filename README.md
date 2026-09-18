@@ -62,6 +62,15 @@ ninja
 ctest --output-on-failure -j$(nproc)
 ```
 
+The initial core implementation provides dependency-free tensor and graph IR
+primitives with deterministic structural validation. Build and test it with:
+
+```bash
+cmake -S . -B build -G Ninja -DENABLE_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
 ## Repository Layout
 
 ```
