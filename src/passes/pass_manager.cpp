@@ -1,0 +1,28 @@
+#include "zenthrix/passes/pass_manager.h"
+
+#include <stdexcept>
+#include <utility>
+
+namespace zenthrix::passes {
+
+void PassManager::add(std::unique_ptr<Pass> pass) {
+  if (pass == nullptr) {
+    throw std::invalid_argument("pass must not be null");
+  }
+  passes_.push_back(std::move(pass));
+}
+
+bool PassManager::run(core::Graph& graph) const {
+  executed_passes_.clear();
+  for (const auto& pass : passes_) {
+    if (!pass->run(graph)) {
+      return false;
+    }
+    executed_passes_.push_back(pass->name());
+  }
+  return true;
+}
+
+bool ValidateGraphPass::run(core::Graph& graph) { return graph.validate(); }
+
+}  // namespace zenthrix::passes

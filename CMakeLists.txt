@@ -8,6 +8,7 @@ add_library(zenthrix_core
   src/core/graph.cpp
   src/core/graph_order.cpp
   src/core/tensor.cpp
+  src/passes/pass_manager.cpp
 )
 target_compile_features(zenthrix_core PUBLIC cxx_std_20)
 target_include_directories(zenthrix_core PUBLIC include)

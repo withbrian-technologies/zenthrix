@@ -3,11 +3,14 @@
 #include <vector>
 
 #include "zenthrix/core/graph.h"
+#include "zenthrix/passes/pass_manager.h"
 
 using zenthrix::core::DataType;
 using zenthrix::core::Graph;
 using zenthrix::core::Node;
 using zenthrix::core::Tensor;
+using zenthrix::passes::PassManager;
+using zenthrix::passes::ValidateGraphPass;
 
 int main() {
   Graph graph;
@@ -38,4 +41,10 @@ int main() {
     cycle_detected = true;
   }
   assert(cycle_detected);
+
+  PassManager passes;
+  passes.add(std::make_unique<ValidateGraphPass>());
+  assert(passes.run(graph));
+  assert(passes.executed_passes() ==
+         std::vector<std::string>{"validate-graph"});
 }
