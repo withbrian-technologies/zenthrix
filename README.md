@@ -15,6 +15,7 @@
 - [Primary Compilation Stages](#primary-compilation-stages)
 - [Build Instructions](#build-instructions-internal-development)
 - [Running the Test Suite](#running-the-test-suite)
+- [Changelog](CHANGELOG.md)
 - [Repository Layout](#repository-layout)
 - [IP Quarantine and Diligence Integrity](#ip-quarantine-and-diligence-integrity)
 
