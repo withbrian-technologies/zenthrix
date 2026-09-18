@@ -10,6 +10,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Tensor construction now rejects shape and byte-size multiplication overflow.
+- Tensor construction now rejects unknown `DataType` enum values.
 - Memory planning now checks aligned offsets, allocation ends, and arena-size
   arithmetic for `size_t` overflow.
 - Added regression coverage for oversized tensor shapes.

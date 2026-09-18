@@ -81,6 +81,13 @@ int main() {
     tensor_overflow = true;
   }
   assert(tensor_overflow);
+  bool invalid_data_type = false;
+  try {
+    static_cast<void>(Tensor("invalid", static_cast<DataType>(99), {1}));
+  } catch (const std::invalid_argument&) {
+    invalid_data_type = true;
+  }
+  assert(invalid_data_type);
 
   PassManager passes;
   passes.add(std::make_unique<ValidateGraphPass>());
