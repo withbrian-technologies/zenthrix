@@ -17,6 +17,11 @@ CPU reference backend returns `ok`, while Apple Metal and Qualcomm Hexagon
 return `unsupported_backend` until their platform-specific implementations are
 built. Unknown backend values return `invalid_descriptor`.
 
+`KernelRegistry::entries(backend)` returns only descriptors for a validated
+backend in the same deterministic `KernelKey` order as `entries()`. An
+unknown backend produces an empty result and never matches a registered
+descriptor.
+
 Strides are expressed in elements, not bytes. They may describe contiguous,
 strided, or broadcast dimensions; validation computes the highest addressed
 element and requires that its byte offset fits within `byte_size`. Shape and

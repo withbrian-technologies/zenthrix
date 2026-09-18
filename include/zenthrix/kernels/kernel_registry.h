@@ -19,6 +19,7 @@ class KernelRegistry {
   [[nodiscard]] Status lookup(const KernelKey& key,
                               KernelDescriptor& descriptor) const;
   [[nodiscard]] std::vector<KernelDescriptor> entries() const;
+  [[nodiscard]] std::vector<KernelDescriptor> entries(Backend backend) const;
 
  private:
   std::map<KernelKey, KernelDescriptor> kernels_;

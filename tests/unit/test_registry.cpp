@@ -33,6 +33,16 @@ int main() {
   assert(registry.lookup(kernel.key, found).ok());
   assert(found.name == kernel.name);
   assert(registry.entries().size() == 1);
+  const KernelDescriptor apple_kernel{
+      {Operation::rms_norm, DataType::f32, Backend::apple_metal},
+      "apple_rms_norm_f32"};
+  assert(registry.register_kernel(apple_kernel).ok());
+  assert(registry.entries(Backend::cpu_reference).size() == 1);
+  assert(registry.entries(Backend::apple_metal).size() == 1);
+  assert(registry.entries(Backend::apple_metal).front().name ==
+         "apple_rms_norm_f32");
+  assert(registry.entries(Backend::qualcomm_hexagon).empty());
+  assert(registry.entries(static_cast<Backend>(99)).empty());
 
   const KernelKey invalid_key{static_cast<Operation>(99), DataType::f32,
                               Backend::cpu_reference};
