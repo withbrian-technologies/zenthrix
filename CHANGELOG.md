@@ -5,6 +5,18 @@ All notable changes to Zenthrix Core are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-09-18
+
+### Added
+
+- Duplicate tensor-producer validation to prevent ambiguous graph execution.
+- Pass-manager failure diagnostics exposing the failed pass name.
+- Regression coverage for duplicate producers and failed-pass reporting.
+
+### Changed
+
+- CMake project version is `0.1.2`.
+
 ## [0.1.1] - 2026-09-18
 
 ### Changed
@@ -28,3 +40,4 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 [0.1.0]: https://github.com/withbrian-technologies/zenthrix-core/releases/tag/v0.1.0
 [0.1.1]: https://github.com/withbrian-technologies/zenthrix-core/releases/tag/v0.1.1
+[0.1.2]: https://github.com/withbrian-technologies/zenthrix-core/releases/tag/v0.1.2

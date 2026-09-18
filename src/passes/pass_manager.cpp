@@ -14,8 +14,12 @@ void PassManager::add(std::unique_ptr<Pass> pass) {
 
 bool PassManager::run(core::Graph& graph) const {
   executed_passes_.clear();
+  failed_pass_.clear();
+  diagnostic_.clear();
   for (const auto& pass : passes_) {
     if (!pass->run(graph)) {
+      failed_pass_ = pass->name();
+      diagnostic_ = "pass failed: " + failed_pass_;
       return false;
     }
     executed_passes_.push_back(pass->name());

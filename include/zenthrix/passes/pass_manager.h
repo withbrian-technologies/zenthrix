@@ -22,10 +22,18 @@ class PassManager {
   [[nodiscard]] const std::vector<std::string>& executed_passes() const noexcept {
     return executed_passes_;
   }
+  [[nodiscard]] const std::string& failed_pass() const noexcept {
+    return failed_pass_;
+  }
+  [[nodiscard]] const std::string& diagnostic() const noexcept {
+    return diagnostic_;
+  }
 
  private:
   std::vector<std::unique_ptr<Pass>> passes_;
   mutable std::vector<std::string> executed_passes_;
+  mutable std::string failed_pass_;
+  mutable std::string diagnostic_;
 };
 
 class ValidateGraphPass final : public Pass {

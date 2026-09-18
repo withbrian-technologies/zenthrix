@@ -17,6 +17,12 @@ using zenthrix::passes::DeadCodeElimination;
 using zenthrix::memory::analyze_lifetimes;
 using zenthrix::memory::plan_memory;
 
+class FailingPass final : public zenthrix::passes::Pass {
+ public:
+  [[nodiscard]] std::string name() const override { return "failing-pass"; }
+  bool run(Graph&) override { return false; }
+};
+
 int main() {
   Graph graph;
   const auto input = graph.add_tensor(Tensor("input", DataType::f32, {1, 4}));
@@ -54,6 +60,17 @@ int main() {
   self_loop.add_node(Node{"loop", "Identity", {loop_tensor}, {loop_tensor}});
   assert(!self_loop.validate());
 
+  Graph duplicate_producer;
+  const auto duplicate_input =
+      duplicate_producer.add_tensor(Tensor("input", DataType::f32, {1}));
+  const auto duplicate_output =
+      duplicate_producer.add_tensor(Tensor("output", DataType::f32, {1}));
+  duplicate_producer.add_node(
+      Node{"first", "Identity", {duplicate_input}, {duplicate_output}});
+  duplicate_producer.add_node(
+      Node{"second", "Identity", {duplicate_input}, {duplicate_output}});
+  assert(!duplicate_producer.validate());
+
   assert(Tensor("byte", DataType::i8, {4}).byte_size() == 4);
 
   PassManager passes;
@@ -61,6 +78,12 @@ int main() {
   assert(passes.run(graph));
   assert(passes.executed_passes() ==
          std::vector<std::string>{"validate-graph"});
+
+  PassManager failing;
+  failing.add(std::make_unique<FailingPass>());
+  assert(!failing.run(graph));
+  assert(failing.failed_pass() == "failing-pass");
+  assert(failing.diagnostic() == "pass failed: failing-pass");
 
   Graph with_dead_code;
   const auto source = with_dead_code.add_tensor(

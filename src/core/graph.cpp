@@ -45,6 +45,7 @@ const Node& Graph::node(const std::size_t index) const {
 }
 
 bool Graph::validate() const noexcept {
+  std::vector<bool> produced(tensors_.size(), false);
   for (const auto& node : nodes_) {
     if (node.name.empty() || node.operation.empty() || node.outputs.empty()) {
       return false;
@@ -64,6 +65,10 @@ bool Graph::validate() const noexcept {
       if (tensor_index >= tensors_.size()) {
         return false;
       }
+      if (produced[tensor_index]) {
+        return false;
+      }
+      produced[tensor_index] = true;
     }
   }
   for (const auto tensor_index : outputs_) {
