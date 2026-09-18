@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(zenthrix_kernels VERSION 0.1.0 LANGUAGES CXX)
+project(zenthrix_kernels VERSION 0.1.1 LANGUAGES CXX)
 
 option(ENABLE_TESTS "Build portable kernel tests" ON)
 
