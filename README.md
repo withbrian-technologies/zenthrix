@@ -63,7 +63,8 @@ ctest --output-on-failure -j$(nproc)
 ```
 
 The initial core implementation provides dependency-free tensor and graph IR
-primitives with deterministic structural validation. Build and test it with:
+primitives with deterministic structural validation and topological ordering
+with cycle detection. Build and test it with:
 
 ```bash
 cmake -S . -B build -G Ninja -DENABLE_TESTS=ON

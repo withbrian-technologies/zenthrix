@@ -23,6 +23,7 @@ class Graph {
   [[nodiscard]] const Tensor& tensor(std::size_t index) const;
   [[nodiscard]] const Node& node(std::size_t index) const;
   [[nodiscard]] bool validate() const noexcept;
+  [[nodiscard]] std::vector<std::size_t> topological_order() const;
   [[nodiscard]] std::size_t tensor_count() const noexcept {
     return tensors_.size();
   }
