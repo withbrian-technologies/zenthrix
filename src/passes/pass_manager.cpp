@@ -9,6 +9,9 @@ void PassManager::add(std::unique_ptr<Pass> pass) {
   if (pass == nullptr) {
     throw std::invalid_argument("pass must not be null");
   }
+  if (pass->name().empty()) {
+    throw std::invalid_argument("pass name must not be empty");
+  }
   passes_.push_back(std::move(pass));
 }
 

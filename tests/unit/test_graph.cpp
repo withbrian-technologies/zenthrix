@@ -24,6 +24,12 @@ class FailingPass final : public zenthrix::passes::Pass {
   bool run(Graph&) override { return false; }
 };
 
+class NamelessPass final : public zenthrix::passes::Pass {
+ public:
+  [[nodiscard]] std::string name() const override { return ""; }
+  bool run(Graph&) override { return true; }
+};
+
 int main() {
   Graph graph;
   const auto input = graph.add_tensor(Tensor("input", DataType::f32, {1, 4}));
@@ -97,6 +103,13 @@ int main() {
   assert(invalid_data_type);
 
   PassManager passes;
+  bool nameless_pass = false;
+  try {
+    passes.add(std::make_unique<NamelessPass>());
+  } catch (const std::invalid_argument&) {
+    nameless_pass = true;
+  }
+  assert(nameless_pass);
   passes.add(std::make_unique<ValidateGraphPass>());
   assert(passes.run(graph));
   assert(passes.executed_passes() ==

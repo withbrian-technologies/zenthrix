@@ -5,7 +5,7 @@ All notable changes to Zenthrix Core are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
-## [0.1.3] - Unreleased
+## [0.1.4] - Unreleased
 
 ### Changed
 
@@ -16,7 +16,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Graph outputs now remain live through the end of execution during lifetime
   analysis and memory planning.
 - Graph output marking now rejects duplicate entries explicitly.
-- CMake project version is `0.1.3`.
+- Pass registration now rejects passes without a name.
+- CMake project version is `0.1.4`.
 - Added regression coverage for oversized tensor shapes.
 
 ## [0.1.2] - 2026-09-18

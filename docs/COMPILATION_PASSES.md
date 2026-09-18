@@ -4,6 +4,10 @@
 successful passes. A pass failure stops execution and leaves the graph in the
 state produced by earlier successful passes.
 
+Pass registration rejects null passes and passes with empty names. Every
+registered pass therefore has a stable identifier for execution records and
+failure diagnostics.
+
 The current MVP includes:
 
 - `ValidateGraphPass`, which gates the pipeline on graph invariants.
