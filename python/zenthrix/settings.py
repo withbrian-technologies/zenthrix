@@ -19,7 +19,7 @@ if sys.version_info >= (3, 11):
     import tomllib
 else:
     try:
-        import tomli as tomllib  # type: ignore[import-not-found]
+        import tomli as tomllib
     except ModuleNotFoundError as exc:
         raise ImportError(
             "zenthrix requires the 'tomli' package on Python < 3.11. "
@@ -62,7 +62,7 @@ def load_config(path: Path) -> dict[str, Any]:
     """
     try:
         with open(path, "rb") as fh:
-            return tomllib.load(fh)  # type: ignore[no-any-return]
+            return tomllib.load(fh)
     except Exception as exc:
         raise InputValidationError(
             f"Failed to parse {path}: {exc}"
