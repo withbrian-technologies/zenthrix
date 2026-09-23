@@ -5,6 +5,22 @@ All notable changes to Zenthrix are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-09-23
+
+### Added
+
+- **SafeTensors format support**: Added `.safetensors` model input format adapter alongside ONNX, GGUF, and PyTorch.
+- **Model metadata inspection**: Extract tensor names, shapes, dtypes, parameter counts, and estimated memory footprint directly from SafeTensors, GGUF, and ONNX source model files without requiring the native engine or loading full weights into RAM.
+- **Configuration file support (`zenthrix.toml`)**: Added project-level defaults for compilation (`target`, `quantization`, `output`) and inference (`max_tokens`, `temperature`) resolved hierarchically with CLI override precedence.
+- **Runtime plugin discovery**: Dynamic discovery of third-party or native runtime adapters registered through the `zenthrix.runtimes` entry point group.
+- **`zenthrix plugins` CLI command**: Inspect and list all discovered runtime plugins in the current Python environment.
+- Exported `ModelMetadata` and `TensorInfo` in the public API.
+
+### Changed
+
+- Bumped the package and public API version to `0.2.0`.
+- Added conditional dependency on `tomli` for Python < 3.11.
+
 ## [0.1.3] - 2026-09-18
 
 ### Changed
@@ -66,3 +82,4 @@ and this project follows [Semantic Versioning](https://semver.org/).
 [0.1.1]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.1.1
 [0.1.2]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.1.2
 [0.1.3]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.1.3
+[0.2.0]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.0

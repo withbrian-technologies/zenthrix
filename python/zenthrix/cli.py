@@ -1,8 +1,14 @@
 """Command-line interface for the Zenthrix frontend."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .metadata import ModelMetadata
 
 from . import __version__
 from .engine import Engine
@@ -24,11 +30,13 @@ def build_parser() -> argparse.ArgumentParser:
     compile_parser.add_argument("--model", required=True)
     compile_parser.add_argument("--format", required=True, dest="model_format")
     compile_parser.add_argument("--target", default="auto")
-    compile_parser.add_argument("--quantization")
+    compile_parser.add_argument("--quantization", default=None)
     compile_parser.add_argument("--output", required=True)
     compile_parser.add_argument("--json", action="store_true")
 
-    inspect_parser = commands.add_parser("inspect", help="Inspect a compiled model")
+    inspect_parser = commands.add_parser(
+        "inspect", help="Inspect a compiled or source model"
+    )
     inspect_parser.add_argument("model")
     inspect_parser.add_argument("--memory-profile", action="store_true")
     inspect_parser.add_argument("--json", action="store_true")
@@ -36,9 +44,12 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser = commands.add_parser("run", help="Run inference")
     run_parser.add_argument("--model", required=True)
     run_parser.add_argument("--prompt", required=True)
-    run_parser.add_argument("--max-tokens", type=int, default=128)
-    run_parser.add_argument("--temperature", type=float, default=0.2)
+    run_parser.add_argument("--max-tokens", type=int, default=None)
+    run_parser.add_argument("--temperature", type=float, default=None)
     run_parser.add_argument("--json", action="store_true")
+
+    commands.add_parser("plugins", help="List installed runtime plugins")
+
     return parser
 
 
@@ -52,18 +63,69 @@ def _compile(args: argparse.Namespace) -> int:
 
 
 def _inspect(args: argparse.Namespace) -> int:
-    validate_compiled_model_path(args.model)
-    raise EngineUnavailableError(
-        "The Zenthrix native engine is not installed. "
-        "Install the platform runtime before inspecting compiled models."
-    )
+    # Source model inspection — works without native engine
+    model_path = args.model
+    suffix = model_path.rsplit(".", 1)[-1].lower() if "." in model_path else ""
+
+    if suffix == "zx":
+        validate_compiled_model_path(model_path)
+        raise EngineUnavailableError(
+            "The Zenthrix native engine is not installed. "
+            "Install the platform runtime before inspecting compiled models."
+        )
+
+    # Inspect a source model (safetensors, gguf, onnx)
+    from .metadata import extract_metadata
+
+    meta = extract_metadata(model_path)
+
+    if args.json:
+        print(json.dumps(meta.to_dict()))
+    else:
+        _print_metadata(meta)
+    return 0
+
+
+def _print_metadata(meta: ModelMetadata) -> None:
+    """Pretty-print model metadata to stdout."""
+
+    lines = [
+        "",
+        f"  Model:          {meta.path}",
+        f"  Format:         {meta.format}",
+        f"  File size:      {_format_size(meta.file_size_bytes)}",
+    ]
+    if meta.parameter_count:
+        lines.append(f"  Parameters:     {meta.parameter_count:,}")
+    if meta.estimated_memory_mb:
+        lines.append(f"  Est. memory:    {meta.estimated_memory_mb:.1f} MB")
+    if meta.architecture:
+        lines.append(f"  Architecture:   {meta.architecture}")
+    if meta.tensors:
+        lines.append(f"  Tensors:        {len(meta.tensors)}")
+    if meta.extra:
+        for key, value in sorted(meta.extra.items()):
+            lines.append(f"  {key}:  {value}")
+    lines.append("")
+    print("\n".join(lines))
+
+
+def _format_size(size_bytes: int) -> str:
+    """Format byte count as a human-readable string."""
+    if size_bytes >= 1_073_741_824:
+        return f"{size_bytes / 1_073_741_824:.1f} GB"
+    if size_bytes >= 1_048_576:
+        return f"{size_bytes / 1_048_576:.1f} MB"
+    if size_bytes >= 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    return f"{size_bytes} B"
 
 
 def _run(args: argparse.Namespace) -> int:
     result = Engine(args.model).generate(
         args.prompt,
-        temperature=args.temperature,
-        max_tokens=args.max_tokens,
+        temperature=args.temperature if args.temperature is not None else 0.2,
+        max_tokens=args.max_tokens if args.max_tokens is not None else 128,
     )
     if args.json:
         print(
@@ -80,9 +142,31 @@ def _run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _plugins(_args: argparse.Namespace) -> int:
+    from .runtime import discover_runtimes
+
+    runtimes = discover_runtimes()
+    if not runtimes:
+        print("No runtime plugins installed.")
+        print()
+        print("Install a compatible runtime package, or see:")
+        print("  https://github.com/withbrian-technologies/zenthrix#plugins")
+        return 0
+
+    print("Installed runtimes:")
+    for name, adapter_cls in runtimes:
+        module = f"{adapter_cls.__module__}:{adapter_cls.__qualname__}"
+        print(f"  • {name} ({module})")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     """Run the CLI and return a process exit code."""
     args = build_parser().parse_args(argv)
+
+    # Merge config-file defaults for compile/run when available
+    _apply_config_defaults(args)
+
     try:
         if args.command == "compile":
             return _compile(args)
@@ -90,6 +174,8 @@ def main(argv: list[str] | None = None) -> int:
             return _inspect(args)
         if args.command == "run":
             return _run(args)
+        if args.command == "plugins":
+            return _plugins(args)
     except (ZenthrixError, ValueError) as error:
         if getattr(args, "json", False):
             print(
@@ -104,6 +190,37 @@ def main(argv: list[str] | None = None) -> int:
             print(f"zenthrix: error: {error}", file=sys.stderr)
         return 2
     return 0
+
+
+def _apply_config_defaults(args: argparse.Namespace) -> None:
+    """Load zenthrix.toml and fill in missing CLI arguments."""
+    try:
+        from .settings import find_config, load_config
+    except ImportError:
+        return
+
+    config_path = find_config()
+    if config_path is None:
+        return
+
+    try:
+        config = load_config(config_path)
+    except Exception:
+        return  # silently skip broken config during CLI execution
+
+    command = getattr(args, "command", None)
+    section = config.get(command, {}) if command else {}
+    if not isinstance(section, dict):
+        return
+
+    for key, value in section.items():
+        # CLI arguments take precedence — only fill in None values
+        current = getattr(args, key, _SENTINEL)
+        if current is None:
+            setattr(args, key, value)
+
+
+_SENTINEL = object()
 
 
 if __name__ == "__main__":

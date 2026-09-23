@@ -5,7 +5,7 @@ from pathlib import Path
 from .config import SUPPORTED_QUANTIZATIONS, SUPPORTED_TARGETS
 from .exceptions import InputValidationError
 
-SUPPORTED_FORMATS = frozenset({"onnx", "pytorch", "gguf"})
+SUPPORTED_FORMATS = frozenset({"onnx", "pytorch", "gguf", "safetensors"})
 
 
 def validate_model_path(path: str | Path) -> Path:
@@ -44,12 +44,14 @@ def validate_model_input(path: str | Path, model_format: str) -> Path:
     from .adapters.gguf_loader import validate_gguf
     from .adapters.onnx_loader import validate_onnx
     from .adapters.pytorch_loader import validate_pytorch_export
+    from .adapters.safetensors_loader import validate_safetensors
 
     normalized = validate_model_format(model_format)
     validators = {
         "gguf": validate_gguf,
         "onnx": validate_onnx,
         "pytorch": validate_pytorch_export,
+        "safetensors": validate_safetensors,
     }
     return validators[normalized](path)
 

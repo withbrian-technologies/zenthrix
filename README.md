@@ -25,7 +25,7 @@ Zenthrix is an edge-native model compiler frontend for compiling open-weight neu
 
 ## Key Features
 
-- **Direct Ingestion** — Native loaders for ONNX, PyTorch Export (AOTInductor), and GGUF architectures, with no intermediate format conversion required.
+- **Direct Ingestion** — Native loaders for SafeTensors, ONNX, PyTorch Export (AOTInductor), and GGUF architectures, with no intermediate format conversion required.
 - **Unified Memory Tiling** — Schedules compute passes against unified memory architectures, reducing peak active RAM allocation by up to 40%.
 - **Zero-Copy Runtime** — Emits standalone, relocatable `.zx` binaries that execute locally without a heavy Python runtime dependency.
 - **Privacy-First Compilation** — Models compile entirely on-device; weights and computational graphs never leave the local environment.
@@ -77,9 +77,16 @@ zenthrix compile \
   --output ./llama-3.2-1b.zx
 ```
 
-### 2. Inspect Graph Optimizations
+### 2. Inspect Models & Graph Optimizations
 
-Analyze operator fusions and projected memory footprints prior to compilation:
+Inspect uncompiled source models (`.safetensors`, `.gguf`, `.onnx`) directly to view parameter counts, tensor shapes, and estimated memory footprint without requiring the native engine:
+
+```bash
+zenthrix inspect ./model.safetensors
+zenthrix inspect ./model.gguf --json
+```
+
+For compiled `.zx` binaries, inspect projected memory profiles and operator fusions:
 
 ```bash
 zenthrix inspect ./llama-3.2-1b.zx --memory-profile

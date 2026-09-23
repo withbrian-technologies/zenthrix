@@ -50,12 +50,35 @@ def test_run_reports_json_error(capsys, tmp_path: Path) -> None:
     assert "native engine" in payload["message"]
 
 
-def test_inspect_rejects_non_compiled_model(capsys, tmp_path: Path) -> None:
-    model = tmp_path / "model.onnx"
-    model.write_bytes(b"placeholder")
+def test_inspect_source_model_shows_metadata(capsys, tmp_path: Path) -> None:
+    """Source models (.onnx, .safetensors, .gguf) are inspected for metadata."""
+    import struct
 
-    assert main(["inspect", str(model)]) == 2
-    assert ".zx compiled model" in capsys.readouterr().err
+    model = tmp_path / "model.safetensors"
+    header = json.dumps(
+        {"weight": {"dtype": "F32", "shape": [4, 3], "data_offsets": [0, 48]}}
+    ).encode()
+    model.write_bytes(struct.pack("<Q", len(header)) + header + b"\x00" * 48)
+
+    assert main(["inspect", str(model)]) == 0
+    output = capsys.readouterr().out
+    assert "safetensors" in output
+    assert "12" in output  # 4*3 = 12 parameters
+
+
+def test_inspect_source_model_json_output(capsys, tmp_path: Path) -> None:
+    import struct
+
+    model = tmp_path / "model.safetensors"
+    header = json.dumps(
+        {"weight": {"dtype": "F32", "shape": [4, 3], "data_offsets": [0, 48]}}
+    ).encode()
+    model.write_bytes(struct.pack("<Q", len(header)) + header + b"\x00" * 48)
+
+    assert main(["inspect", str(model), "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["format"] == "safetensors"
+    assert payload["parameter_count"] == 12
 
 
 def test_compile_reports_missing_native_engine(tmp_path: Path, capsys) -> None:
@@ -98,3 +121,9 @@ def test_compile_rejects_invalid_output_extension(tmp_path: Path, capsys) -> Non
         == 2
     )
     assert ".zx extension" in capsys.readouterr().err
+
+
+def test_plugins_shows_no_plugins(capsys) -> None:
+    assert main(["plugins"]) == 0
+    output = capsys.readouterr().out
+    assert "No runtime plugins installed" in output

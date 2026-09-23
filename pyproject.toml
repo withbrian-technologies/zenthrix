@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zenthrix"
-version = "0.1.3"
+version = "0.2.0"
 description = "Hardware-adaptive edge neural graph compiler frontend"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -16,7 +16,9 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
 ]
-dependencies = []
+dependencies = [
+  "tomli>=2.0; python_version < '3.11'",
+]
 
 [dependency-groups]
 dev = [

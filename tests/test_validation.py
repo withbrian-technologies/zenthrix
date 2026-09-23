@@ -16,7 +16,7 @@ def test_validate_model_format_normalizes_case() -> None:
 
 def test_validate_model_format_rejects_unknown_format() -> None:
     with pytest.raises(InputValidationError, match="Unsupported model format"):
-        validate_model_format("safetensors")
+        validate_model_format("tflite")
 
 
 def test_validate_model_path_rejects_directory(tmp_path: Path) -> None:
@@ -45,3 +45,27 @@ def test_validate_compile_options_rejects_unknown_target(tmp_path: Path) -> None
 def test_validate_compile_options_accepts_supported_values(tmp_path: Path) -> None:
     output = tmp_path / "model.zx"
     assert validate_compile_options("QUALCOMM", "INT4", output) == output
+
+
+# -- SafeTensors format support -----------------------------------------------
+
+
+def test_validate_model_format_accepts_safetensors() -> None:
+    assert validate_model_format("SAFETENSORS") == "safetensors"
+
+
+def test_validate_model_input_validates_safetensors_extension(
+    tmp_path: Path,
+) -> None:
+    model = tmp_path / "model.safetensors"
+    model.write_bytes(b"placeholder")
+    assert validate_model_input(model, "safetensors") == model
+
+
+def test_validate_model_input_rejects_mismatched_safetensors(
+    tmp_path: Path,
+) -> None:
+    model = tmp_path / "model.gguf"
+    model.write_bytes(b"placeholder")
+    with pytest.raises(InputValidationError, match="Expected a .safetensors file"):
+        validate_model_input(model, "safetensors")
