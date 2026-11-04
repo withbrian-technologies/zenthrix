@@ -81,6 +81,17 @@ def test_inspect_source_model_json_output(capsys, tmp_path: Path) -> None:
     assert payload["parameter_count"] == 12
 
 
+def test_inspect_gguf_reports_tensor_count(capsys, tmp_path: Path) -> None:
+    import struct
+
+    model = tmp_path / "model.gguf"
+    model.write_bytes(struct.pack("<IIQQ", 0x46475547, 3, 7, 0))
+
+    assert main(["inspect", str(model), "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["tensor_count"] == 7
+
+
 def test_compile_reports_missing_native_engine(tmp_path: Path, capsys) -> None:
     model = tmp_path / "model.onnx"
     model.write_bytes(b"placeholder")
@@ -160,3 +171,8 @@ def test_plugins_shows_no_plugins(capsys) -> None:
     assert main(["plugins"]) == 0
     output = capsys.readouterr().out
     assert "No runtime plugins installed" in output
+
+
+def test_plugins_json_output(capsys) -> None:
+    assert main(["plugins", "--json"]) == 0
+    assert json.loads(capsys.readouterr().out) == []
