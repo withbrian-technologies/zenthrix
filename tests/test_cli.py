@@ -102,6 +102,39 @@ def test_compile_reports_missing_native_engine(tmp_path: Path, capsys) -> None:
     assert "native compiler engine" in capsys.readouterr().err
 
 
+def test_compile_uses_config_defaults(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    model = tmp_path / "model.onnx"
+    model.write_bytes(b"placeholder")
+    (tmp_path / "zenthrix.toml").write_text(
+        "[compile]\n"
+        "model_format = 'onnx'\n"
+        "target = 'apple'\n"
+        "output = 'model.zx'\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    assert main(["compile", "--model", str(model)]) == 2
+    assert "native compiler engine" in capsys.readouterr().err
+
+
+def test_compile_requires_config_or_cli_values(tmp_path: Path, capsys) -> None:
+    model = tmp_path / "model.onnx"
+    model.write_bytes(b"placeholder")
+
+    assert main(["compile", "--model", str(model)]) == 2
+    assert "--format" in capsys.readouterr().err
+
+
+def test_malformed_config_is_reported(tmp_path: Path, monkeypatch, capsys) -> None:
+    (tmp_path / "zenthrix.toml").write_text("[[[[invalid toml")
+    monkeypatch.chdir(tmp_path)
+
+    assert main(["plugins"]) == 2
+    assert "Failed to parse" in capsys.readouterr().err
+
+
 def test_compile_rejects_invalid_output_extension(tmp_path: Path, capsys) -> None:
     model = tmp_path / "model.onnx"
     model.write_bytes(b"placeholder")

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 from . import __version__
 from .engine import Engine
-from .exceptions import EngineUnavailableError, ZenthrixError
+from .exceptions import EngineUnavailableError, InputValidationError, ZenthrixError
 from .validation import (
     validate_compile_options,
     validate_compiled_model_path,
@@ -28,10 +28,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     compile_parser = commands.add_parser("compile", help="Compile a model")
     compile_parser.add_argument("--model", required=True)
-    compile_parser.add_argument("--format", required=True, dest="model_format")
-    compile_parser.add_argument("--target", default="auto")
+    compile_parser.add_argument("--format", default=None, dest="model_format")
+    compile_parser.add_argument("--target", default=None)
     compile_parser.add_argument("--quantization", default=None)
-    compile_parser.add_argument("--output", required=True)
+    compile_parser.add_argument("--output", default=None)
     compile_parser.add_argument("--json", action="store_true")
 
     inspect_parser = commands.add_parser(
@@ -54,8 +54,20 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _compile(args: argparse.Namespace) -> int:
+    if args.model_format is None:
+        raise InputValidationError(
+            "compile requires --format or model_format in zenthrix.toml"
+        )
+    if args.output is None:
+        raise InputValidationError(
+            "compile requires --output or output in zenthrix.toml"
+        )
     validate_model_input(args.model, args.model_format)
-    validate_compile_options(args.target, args.quantization, args.output)
+    validate_compile_options(
+        args.target if args.target is not None else "auto",
+        args.quantization,
+        args.output,
+    )
     raise ZenthrixError(
         "The native compiler engine is not installed. "
         "The public frontend cannot produce a .zx binary yet."
@@ -164,10 +176,10 @@ def main(argv: list[str] | None = None) -> int:
     """Run the CLI and return a process exit code."""
     args = build_parser().parse_args(argv)
 
-    # Merge config-file defaults for compile/run when available
-    _apply_config_defaults(args)
-
     try:
+        # Merge config-file defaults for compile/run when available
+        _apply_config_defaults(args)
+
         if args.command == "compile":
             return _compile(args)
         if args.command == "inspect":
@@ -203,10 +215,7 @@ def _apply_config_defaults(args: argparse.Namespace) -> None:
     if config_path is None:
         return
 
-    try:
-        config = load_config(config_path)
-    except Exception:
-        return  # silently skip broken config during CLI execution
+    config = load_config(config_path)
 
     command = getattr(args, "command", None)
     section = config.get(command, {}) if command else {}
