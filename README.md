@@ -139,6 +139,26 @@ failures are emitted as a JSON object with `error` and `message` fields:
 
 Successful inference uses `text`, `ttft_ms`, and `tokens_per_second` fields.
 
+### Project Configuration
+
+Create `zenthrix.toml` in the project directory to provide compile and run
+defaults. CLI arguments override values from the file:
+
+```toml
+[compile]
+model_format = "onnx"
+target = "auto"
+quantization = "int4"
+output = "./build/model.zx"
+
+[run]
+max_tokens = 256
+temperature = 0.2
+```
+
+The configuration file is discovered in the current directory or its parents.
+Malformed configuration is reported as a CLI error.
+
 ## Supported Target Architectures
 
 | Silicon Target | Optimization Backend | Compute Units |
