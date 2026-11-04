@@ -138,6 +138,8 @@ failures are emitted as a JSON object with `error` and `message` fields:
 ```
 
 Successful inference uses `text`, `ttft_ms`, and `tokens_per_second` fields.
+The `plugins --json` command emits a JSON array containing each installed
+runtime's `name` and importable `adapter` path.
 
 ### Project Configuration
 

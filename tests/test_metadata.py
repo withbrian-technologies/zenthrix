@@ -120,12 +120,14 @@ class TestExtractGgufMetadata:
 
         assert meta.format == "gguf"
         assert meta.architecture == "llama"
+        assert meta.tensor_count == 5
         assert meta.file_size_bytes > 0
 
     def test_version_in_extra(self, tmp_path):
         model = _write_gguf(tmp_path / "model.gguf", version=3)
         meta = extract_metadata(model)
         assert meta.extra.get("version") == "3"
+        assert meta.to_dict()["tensor_count"] == 5
 
     def test_bad_magic_rejected(self, tmp_path):
         model = tmp_path / "bad.gguf"

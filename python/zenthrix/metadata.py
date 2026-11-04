@@ -41,6 +41,7 @@ class ModelMetadata:
     estimated_memory_mb: float = 0.0
     architecture: str = ""
     extra: dict[str, str] = field(default_factory=dict)
+    tensor_count: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to a JSON-compatible dictionary."""
@@ -51,7 +52,11 @@ class ModelMetadata:
             "parameter_count": self.parameter_count,
             "estimated_memory_mb": round(self.estimated_memory_mb, 2),
             "architecture": self.architecture,
-            "tensor_count": len(self.tensors),
+            "tensor_count": (
+                len(self.tensors)
+                if self.tensor_count is None
+                else self.tensor_count
+            ),
             "extra": dict(self.extra),
         }
 
@@ -246,6 +251,7 @@ def _parse_gguf_header(path: Path) -> ModelMetadata:
         architecture=architecture,
         extra=extra,
         tensors=(),
+        tensor_count=tensor_count,
     )
 
 

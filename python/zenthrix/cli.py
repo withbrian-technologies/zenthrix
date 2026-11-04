@@ -48,7 +48,10 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--temperature", type=float, default=None)
     run_parser.add_argument("--json", action="store_true")
 
-    commands.add_parser("plugins", help="List installed runtime plugins")
+    plugins_parser = commands.add_parser(
+        "plugins", help="List installed runtime plugins"
+    )
+    plugins_parser.add_argument("--json", action="store_true")
 
     return parser
 
@@ -113,8 +116,8 @@ def _print_metadata(meta: ModelMetadata) -> None:
         lines.append(f"  Est. memory:    {meta.estimated_memory_mb:.1f} MB")
     if meta.architecture:
         lines.append(f"  Architecture:   {meta.architecture}")
-    if meta.tensors:
-        lines.append(f"  Tensors:        {len(meta.tensors)}")
+    if meta.tensor_count is not None:
+        lines.append(f"  Tensors:        {meta.tensor_count}")
     if meta.extra:
         for key, value in sorted(meta.extra.items()):
             lines.append(f"  {key}:  {value}")
@@ -154,10 +157,26 @@ def _run(args: argparse.Namespace) -> int:
     return 0
 
 
-def _plugins(_args: argparse.Namespace) -> int:
+def _plugins(args: argparse.Namespace) -> int:
     from .runtime import discover_runtimes
 
     runtimes = discover_runtimes()
+    if args.json:
+        print(
+            json.dumps(
+                [
+                    {
+                        "name": name,
+                        "adapter": (
+                            f"{adapter_cls.__module__}:{adapter_cls.__qualname__}"
+                        ),
+                    }
+                    for name, adapter_cls in runtimes
+                ]
+            )
+        )
+        return 0
+
     if not runtimes:
         print("No runtime plugins installed.")
         print()
