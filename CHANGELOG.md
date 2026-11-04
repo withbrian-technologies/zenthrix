@@ -5,6 +5,19 @@ All notable changes to Zenthrix are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.1] - 2026-11-04
+
+### Added
+
+- Added JSON output for `zenthrix plugins` with runtime names and adapter paths.
+- Added project configuration documentation and compile defaults from
+  `zenthrix.toml`, including clear errors for malformed configuration.
+- GGUF inspection now reports the tensor count stored in the file header.
+
+### Changed
+
+- Bumped the package and public API version to `0.2.1`.
+
 ## [0.2.0] - 2026-09-23
 
 ### Added
@@ -83,3 +96,4 @@ and this project follows [Semantic Versioning](https://semver.org/).
 [0.1.2]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.1.2
 [0.1.3]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.1.3
 [0.2.0]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.0
+[0.2.1]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.1

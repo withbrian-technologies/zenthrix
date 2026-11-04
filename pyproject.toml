@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zenthrix"
-version = "0.2.0"
+version = "0.2.1"
 description = "Hardware-adaptive edge neural graph compiler frontend"
 readme = "README.md"
 license = { file = "LICENSE" }
