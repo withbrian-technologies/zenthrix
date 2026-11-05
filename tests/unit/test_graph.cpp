@@ -85,6 +85,24 @@ int main() {
       Node{"second", "Identity", {duplicate_input}, {duplicate_output}});
   assert(!duplicate_producer.validate());
 
+  Graph duplicate_names;
+  const auto duplicate_name_input =
+      duplicate_names.add_tensor(Tensor("input", DataType::f32, {1}));
+  const auto duplicate_name_first =
+      duplicate_names.add_tensor(Tensor("first", DataType::f32, {1}));
+  const auto duplicate_name_second =
+      duplicate_names.add_tensor(Tensor("second", DataType::f32, {1}));
+  duplicate_names.add_node(
+      Node{"same", "Identity", {duplicate_name_input}, {duplicate_name_first}});
+  bool duplicate_node_name = false;
+  try {
+    duplicate_names.add_node(
+        Node{"same", "Identity", {duplicate_name_input}, {duplicate_name_second}});
+  } catch (const std::invalid_argument&) {
+    duplicate_node_name = true;
+  }
+  assert(duplicate_node_name);
+
   assert(Tensor("byte", DataType::i8, {4}).byte_size() == 4);
   bool tensor_overflow = false;
   try {
@@ -111,6 +129,13 @@ int main() {
   }
   assert(nameless_pass);
   passes.add(std::make_unique<ValidateGraphPass>());
+  bool duplicate_pass = false;
+  try {
+    passes.add(std::make_unique<ValidateGraphPass>());
+  } catch (const std::invalid_argument&) {
+    duplicate_pass = true;
+  }
+  assert(duplicate_pass);
   assert(passes.run(graph));
   assert(passes.executed_passes() ==
          std::vector<std::string>{"validate-graph"});

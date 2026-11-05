@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <unordered_set>
 #include <utility>
 
 namespace zenthrix::core {
@@ -14,6 +15,11 @@ std::size_t Graph::add_tensor(Tensor tensor) {
 std::size_t Graph::add_node(Node node) {
   if (node.name.empty() || node.operation.empty() || node.outputs.empty()) {
     throw std::invalid_argument("node requires name, operation, and outputs");
+  }
+  for (const auto& existing : nodes_) {
+    if (existing.name == node.name) {
+      throw std::invalid_argument("node name must be unique");
+    }
   }
   nodes_.push_back(std::move(node));
   return nodes_.size() - 1;
@@ -47,8 +53,12 @@ const Node& Graph::node(const std::size_t index) const {
 
 bool Graph::validate() const noexcept {
   std::vector<bool> produced(tensors_.size(), false);
+  std::unordered_set<std::string> node_names;
   for (const auto& node : nodes_) {
     if (node.name.empty() || node.operation.empty() || node.outputs.empty()) {
+      return false;
+    }
+    if (!node_names.insert(node.name).second) {
       return false;
     }
     for (const auto input : node.inputs) {

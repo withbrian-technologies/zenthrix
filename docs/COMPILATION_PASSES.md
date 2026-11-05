@@ -4,9 +4,9 @@
 successful passes. A pass failure stops execution and leaves the graph in the
 state produced by earlier successful passes.
 
-Pass registration rejects null passes and passes with empty names. Every
-registered pass therefore has a stable identifier for execution records and
-failure diagnostics.
+Pass registration rejects null passes, passes with empty names, and duplicate
+names. Every registered pass therefore has a unique, stable identifier for
+execution records and failure diagnostics.
 
 The current MVP includes:
 

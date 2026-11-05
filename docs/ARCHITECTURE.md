@@ -3,7 +3,8 @@
 The core library is organized into three dependency layers:
 
 1. `zenthrix::core` owns typed tensors, nodes, graph validation, and
-   deterministic topological ordering.
+   deterministic topological ordering. Node names are unique within a graph,
+   providing stable identifiers for diagnostics and later compiler passes.
 2. `zenthrix::passes` transforms a validated graph through ordered compiler
    passes. Passes return `false` when they cannot safely transform their input.
 3. `zenthrix::memory` derives tensor lifetimes from execution order and places

@@ -12,6 +12,11 @@ void PassManager::add(std::unique_ptr<Pass> pass) {
   if (pass->name().empty()) {
     throw std::invalid_argument("pass name must not be empty");
   }
+  for (const auto& registered : passes_) {
+    if (registered->name() == pass->name()) {
+      throw std::invalid_argument("pass name must be unique");
+    }
+  }
   passes_.push_back(std::move(pass));
 }
 

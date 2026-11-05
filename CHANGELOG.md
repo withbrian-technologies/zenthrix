@@ -16,7 +16,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Graph outputs now remain live through the end of execution during lifetime
   analysis and memory planning.
 - Graph output marking now rejects duplicate entries explicitly.
+- Graph node registration now rejects duplicate names.
 - Pass registration now rejects passes without a name.
+- Pass registration now rejects duplicate names.
 - CMake project version is `0.1.4`.
 - Added regression coverage for oversized tensor shapes.
 
