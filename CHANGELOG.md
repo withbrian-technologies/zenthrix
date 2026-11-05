@@ -5,7 +5,7 @@ All notable changes to Zenthrix Core are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
-## [0.1.4] - Unreleased
+## [0.1.3] - 2026-11-05
 
 ### Changed
 
@@ -19,7 +19,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Graph node registration now rejects duplicate names.
 - Pass registration now rejects passes without a name.
 - Pass registration now rejects duplicate names.
-- CMake project version is `0.1.4`.
+- CMake project version is `0.1.3`.
 - Added regression coverage for oversized tensor shapes.
 
 ## [0.1.2] - 2026-09-18
@@ -58,3 +58,4 @@ and this project follows [Semantic Versioning](https://semver.org/).
 [0.1.0]: https://github.com/withbrian-technologies/zenthrix-core/releases/tag/v0.1.0
 [0.1.1]: https://github.com/withbrian-technologies/zenthrix-core/releases/tag/v0.1.1
 [0.1.2]: https://github.com/withbrian-technologies/zenthrix-core/releases/tag/v0.1.2
+[0.1.3]: https://github.com/withbrian-technologies/zenthrix-core/releases/tag/v0.1.3
