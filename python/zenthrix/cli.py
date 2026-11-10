@@ -46,6 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--prompt", required=True)
     run_parser.add_argument("--max-tokens", type=int, default=None)
     run_parser.add_argument("--temperature", type=float, default=None)
+    run_parser.add_argument("--runtime", default=None)
     run_parser.add_argument("--json", action="store_true")
 
     plugins_parser = commands.add_parser(
@@ -137,7 +138,7 @@ def _format_size(size_bytes: int) -> str:
 
 
 def _run(args: argparse.Namespace) -> int:
-    result = Engine(args.model).generate(
+    result = Engine(args.model, runtime_name=args.runtime).generate(
         args.prompt,
         temperature=args.temperature if args.temperature is not None else 0.2,
         max_tokens=args.max_tokens if args.max_tokens is not None else 128,

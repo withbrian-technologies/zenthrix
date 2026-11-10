@@ -40,6 +40,7 @@ class ZenthrixSettings:
     model_format: str | None = None
     max_tokens: int = 128
     temperature: float = 0.2
+    runtime: str | None = None
 
 
 def find_config(start: Path | None = None) -> Path | None:
@@ -100,4 +101,5 @@ def resolve_settings(
         model_format=_pick("model_format", compile_cfg),
         max_tokens=_pick("max_tokens", run_cfg, default=128),
         temperature=_pick("temperature", run_cfg, default=0.2),
+        runtime=_pick("runtime", run_cfg),
     )

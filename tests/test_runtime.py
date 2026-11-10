@@ -84,6 +84,24 @@ class TestDefaultRuntime:
         rt = default_runtime()
         assert isinstance(rt, UnavailableRuntime)
 
+    def test_selects_named_runtime(self):
+        first = FakeEntryPoint("first", FakeRuntime)
+        second = FakeEntryPoint("second", FakeRuntime)
+        with patch(
+            "zenthrix.runtime.importlib.metadata.entry_points",
+            return_value={"zenthrix.runtimes": [first, second]},
+        ):
+            rt = default_runtime("second")
+        assert isinstance(rt, FakeRuntime)
+
+    def test_rejects_unknown_runtime(self):
+        with patch(
+            "zenthrix.runtime.importlib.metadata.entry_points",
+            return_value={"zenthrix.runtimes": []},
+        ):
+            with pytest.raises(RuntimeError, match="not installed"):
+                default_runtime("missing")
+
     def test_unavailable_runtime_raises(self):
         rt = UnavailableRuntime()
         with pytest.raises(RuntimeError, match="native engine"):

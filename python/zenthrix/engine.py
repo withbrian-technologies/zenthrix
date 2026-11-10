@@ -26,10 +26,20 @@ class Engine:
     """
 
     def __init__(
-        self, model_path: str | Path, *, runtime: RuntimeAdapter | None = None
+        self,
+        model_path: str | Path,
+        *,
+        runtime: RuntimeAdapter | None = None,
+        runtime_name: str | None = None,
     ) -> None:
+        if runtime is not None and runtime_name is not None:
+            raise ValueError("runtime and runtime_name are mutually exclusive")
         self.model_path = validate_compiled_model_path(model_path)
-        self._runtime = runtime if runtime is not None else default_runtime()
+        self._runtime = (
+            runtime
+            if runtime is not None
+            else default_runtime(runtime_name)
+        )
 
     def generate(
         self,

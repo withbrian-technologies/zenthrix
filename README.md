@@ -103,6 +103,10 @@ zenthrix run \
   --max-tokens 128
 ```
 
+When multiple runtime plugins are installed, select one explicitly with
+`--runtime NAME`. The same setting can be provided as `runtime` under `[run]`
+in `zenthrix.toml`.
+
 ### 4. Python API Usage
 
 ```python
