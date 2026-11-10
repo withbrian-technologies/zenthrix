@@ -87,9 +87,23 @@ def discover_runtimes() -> list[tuple[str, type[RuntimeAdapter]]]:
     return results
 
 
-def default_runtime() -> RuntimeAdapter:
-    """Return the first discovered runtime, or an explicit unavailable boundary."""
+def default_runtime(runtime_name: str | None = None) -> RuntimeAdapter:
+    """Return a selected runtime or the unavailable boundary.
+
+    When *runtime_name* is omitted, the first discovered runtime is used for
+    backward compatibility. A requested name must match an installed entry
+    point exactly.
+    """
     runtimes = discover_runtimes()
+    if runtime_name is not None:
+        for name, adapter_cls in runtimes:
+            if name == runtime_name:
+                return adapter_cls()
+        available = ", ".join(name for name, _adapter_cls in runtimes)
+        detail = f" Available runtimes: {available}." if available else ""
+        raise EngineUnavailableError(
+            f"Runtime plugin '{runtime_name}' is not installed.{detail}"
+        )
     if runtimes:
         _name, adapter_cls = runtimes[0]
         return adapter_cls()

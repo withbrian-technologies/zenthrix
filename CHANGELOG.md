@@ -5,6 +5,18 @@ All notable changes to Zenthrix are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.2] - 2026-11-10
+
+### Added
+
+- Added explicit runtime plugin selection through `Engine`, the `run
+  --runtime` CLI option, and the `[run] runtime` configuration setting.
+- Added actionable errors when a requested runtime plugin is unavailable.
+
+### Changed
+
+- Bumped the package and public API version to `0.2.2`.
+
 ## [0.2.1] - 2026-11-04
 
 ### Added
@@ -97,3 +109,4 @@ and this project follows [Semantic Versioning](https://semver.org/).
 [0.1.3]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.1.3
 [0.2.0]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.0
 [0.2.1]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.1
+[0.2.2]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.2

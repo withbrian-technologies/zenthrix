@@ -41,6 +41,16 @@ def test_engine_delegates_to_injected_runtime(tmp_path: Path) -> None:
     assert result.tokens_per_second == 20.0
 
 
+def test_engine_rejects_runtime_selection_with_injected_runtime(
+    tmp_path: Path,
+) -> None:
+    model = tmp_path / "model.zx"
+    model.write_bytes(b"placeholder")
+
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        Engine(model, runtime=FakeRuntime(), runtime_name="fake")
+
+
 def test_engine_rejects_non_finite_temperature(tmp_path: Path) -> None:
     model = tmp_path / "model.zx"
     model.write_bytes(b"placeholder")

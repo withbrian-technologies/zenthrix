@@ -50,6 +50,30 @@ def test_run_reports_json_error(capsys, tmp_path: Path) -> None:
     assert "native engine" in payload["message"]
 
 
+def test_run_accepts_runtime_selection(capsys, tmp_path: Path) -> None:
+    model = tmp_path / "model.zx"
+    model.write_bytes(b"placeholder")
+
+    assert (
+        main(
+            [
+                "run",
+                "--model",
+                str(model),
+                "--prompt",
+                "hello",
+                "--runtime",
+                "missing",
+                "--json",
+            ]
+        )
+        == 2
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["error"] == "EngineUnavailableError"
+    assert "missing" in payload["message"]
+
+
 def test_inspect_source_model_shows_metadata(capsys, tmp_path: Path) -> None:
     """Source models (.onnx, .safetensors, .gguf) are inspected for metadata."""
     import struct

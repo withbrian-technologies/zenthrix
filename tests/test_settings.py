@@ -81,10 +81,14 @@ class TestResolveSettings:
     def test_uses_config_defaults(self):
         cli = {"target": None, "quantization": None, "output": None,
                "max_tokens": None, "temperature": None, "model_format": None}
-        config = {"compile": {"target": "arm"}, "run": {"max_tokens": 256}}
+        config = {
+            "compile": {"target": "arm"},
+            "run": {"max_tokens": 256, "runtime": "metal"},
+        }
         settings = resolve_settings(cli, config)
         assert settings.target == "arm"
         assert settings.max_tokens == 256
+        assert settings.runtime == "metal"
 
     def test_uses_hardcoded_defaults(self):
         cli = {"target": None, "quantization": None, "output": None,
@@ -97,3 +101,4 @@ class TestResolveSettings:
                "max_tokens": None, "temperature": None, "model_format": None}
         settings = resolve_settings(cli, {})
         assert settings.target == "auto"
+        assert settings.runtime is None
