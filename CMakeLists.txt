@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(zenthrix_core VERSION 0.1.3 LANGUAGES CXX)
+project(zenthrix_core VERSION 0.1.4 LANGUAGES CXX)
 
 option(ENABLE_TESTS "Build unit tests" ON)
 
@@ -8,6 +8,7 @@ add_library(zenthrix_core
   src/core/graph.cpp
   src/core/graph_order.cpp
   src/core/tensor.cpp
+  src/c_api.cpp
   src/passes/pass_manager.cpp
   src/passes/dead_code_elimination.cpp
   src/memory/lifetime_analysis.cpp

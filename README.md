@@ -7,6 +7,10 @@
 **Visibility:** Private
 **Role:** Core intermediate representation (IR), graph rewrite passes, memory planning, and operator fusion engine.
 
+**Interop:** A stable C ABI is provided in `include/zenthrix/c_api.h` for
+Python bindings, platform runtimes, and other native clients. The C ABI is the
+supported cross-language boundary; the implementation remains C++20.
+
 ---
 
 ## Table of Contents
@@ -103,6 +107,7 @@ zenthrix-core/
 │           ├── lifetime_analysis.h
 │           ├── memory_planner.h
 │           └── arena_allocator.h
+│       └── c_api.h
 ├── src/
 │   ├── core/
 │   │   ├── dialect.cpp

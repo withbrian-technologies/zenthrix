@@ -13,3 +13,9 @@ The core library is organized into three dependency layers:
 External dialect ingestion and native code generation are intentionally not
 implemented in this MVP. They should enter through typed adapters rather than
 coupling the core graph to a particular frontend or device backend.
+
+The public integration boundary is a small C ABI in `zenthrix/c_api.h`. It
+uses opaque graph handles, fixed-width status and data-type enums, and
+thread-local error text so Python, Rust, platform runtimes, and other native
+clients do not depend on the C++ ABI. The C ABI is an adapter over the C++
+implementation, not a second graph engine.

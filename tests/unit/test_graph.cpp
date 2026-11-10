@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "zenthrix/core/graph.h"
+#include "zenthrix/c_api.h"
 #include "zenthrix/passes/pass_manager.h"
 #include "zenthrix/passes/dead_code_elimination.h"
 #include "zenthrix/memory/memory_planner.h"
@@ -31,6 +32,29 @@ class NamelessPass final : public zenthrix::passes::Pass {
 };
 
 int main() {
+  assert(zx_core_version_major() == 0);
+  assert(zx_core_version_minor() == 1);
+  assert(zx_graph_validate(nullptr) == ZX_STATUS_INVALID_ARGUMENT);
+  assert(zx_last_error() != nullptr);
+  auto* c_graph = zx_graph_create();
+  assert(c_graph != nullptr);
+  const size_t c_shape[] = {1, 4};
+  size_t c_input = 0;
+  size_t c_output = 0;
+  size_t c_node = 0;
+  assert(zx_graph_add_tensor(c_graph, "input", ZX_DATA_TYPE_F32, c_shape, 2,
+                             &c_input) == ZX_STATUS_OK);
+  assert(zx_graph_add_tensor(c_graph, "output", ZX_DATA_TYPE_F32, c_shape, 2,
+                             &c_output) == ZX_STATUS_OK);
+  const size_t c_inputs[] = {c_input};
+  const size_t c_outputs[] = {c_output};
+  assert(zx_graph_add_node(c_graph, "identity", "Identity", c_inputs, 1,
+                           c_outputs, 1, &c_node) == ZX_STATUS_OK);
+  assert(zx_graph_mark_output(c_graph, c_output) == ZX_STATUS_OK);
+  assert(zx_graph_validate(c_graph) == ZX_STATUS_OK);
+  assert(zx_graph_mark_output(c_graph, c_output) == ZX_STATUS_INVALID_ARGUMENT);
+  zx_graph_destroy(c_graph);
+
   Graph graph;
   const auto input = graph.add_tensor(Tensor("input", DataType::f32, {1, 4}));
   const auto output = graph.add_tensor(Tensor("output", DataType::f32, {1, 4}));
