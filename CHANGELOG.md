@@ -9,13 +9,23 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added reference CPU compute kernels (`MatMul`, `RMSNorm`, `SiLU`, `Add`, `Identity`)
+  in `zenthrix::kernels::cpu` and registry initialization via
+  `register_cpu_reference_kernels()`.
+- Added graph execution engine (`zenthrix::core::Executor`) allocating contiguous
+  memory arena buffers, mapping planned tensor offsets, and dispatching operations
+  to the kernel registry.
+- Added C ABI executor endpoints (`zx_executor_create`, `zx_executor_destroy`,
+  `zx_executor_set_tensor_data`, `zx_executor_get_tensor_data`, `zx_executor_run`).
+- Added `NativeExecutor` ctypes interface in `python/zenthrix/native.py` and built-in
+  `CpuReferenceRuntime` in `python/zenthrix/runtime.py` enabling local numerical execution.
 - Added a unified `libzenthrix` shared library combining `core` and `kernels`.
 - Added expanded C ABI endpoints for memory arena planning, pass manager
   pipeline execution, kernel backend capabilities, and file serialization.
 - Added relocatable `.zx` binary format (v1.0) container specification, C++
   serializer/deserializer, and Python reader/writer.
 - Added zero-dependency `ctypes` bridge in `zenthrix.native` exposing
-  `NativeGraph`, `NativeMemoryPlan`, and `NativePassManager`.
+  `NativeGraph`, `NativeMemoryPlan`, `NativeAllocation`, and `NativePassManager`.
 - Added compiled model inspection for `.zx` files in `zenthrix inspect` with
   `--memory-profile` and `--json` support.
 

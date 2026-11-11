@@ -9,7 +9,15 @@ namespace zenthrix::kernels {
 
 enum class DataType { f16, f32, i8, i32 };
 enum class Backend { cpu_reference, apple_metal, qualcomm_hexagon };
-enum class Operation { matmul, rms_norm, fused_attention };
+enum class Operation {
+  matmul,
+  rms_norm,
+  fused_attention,
+  elementwise_add,
+  silu,
+  gelu,
+  identity
+};
 
 enum class StatusCode {
   ok,
@@ -17,6 +25,7 @@ enum class StatusCode {
   unsupported_backend,
   duplicate_kernel,
   kernel_not_found,
+  execution_error,
 };
 
 struct Status {
@@ -39,6 +48,17 @@ struct KernelKey {
   Backend backend;
   auto operator<=>(const KernelKey&) const = default;
 };
+
+struct KernelContext {
+  const void* const* inputs;
+  std::size_t input_count;
+  void* const* outputs;
+  std::size_t output_count;
+  const TensorDescriptor* input_descs;
+  const TensorDescriptor* output_descs;
+};
+
+using KernelFn = Status (*)(const KernelContext& ctx);
 
 [[nodiscard]] Status validate(const TensorDescriptor& descriptor);
 [[nodiscard]] Status validate(const KernelKey& key);

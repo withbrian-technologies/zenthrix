@@ -14,6 +14,7 @@ add_library(zenthrix_core
   src/memory/lifetime_analysis.cpp
   src/memory/memory_planner.cpp
   src/zx_format.cpp
+  src/core/executor.cpp
 )
 target_compile_features(zenthrix_core PUBLIC cxx_std_20)
 target_include_directories(zenthrix_core PUBLIC include)
@@ -36,4 +37,8 @@ if(ENABLE_TESTS)
   add_executable(zenthrix_zx_format_tests tests/unit/test_zx_format.cpp)
   target_link_libraries(zenthrix_zx_format_tests PRIVATE zenthrix_core)
   add_test(NAME zenthrix_zx_format_tests COMMAND zenthrix_zx_format_tests)
+
+  add_executable(zenthrix_executor_tests tests/unit/test_executor.cpp)
+  target_link_libraries(zenthrix_executor_tests PRIVATE zenthrix_core)
+  add_test(NAME zenthrix_executor_tests COMMAND zenthrix_executor_tests)
 endif()

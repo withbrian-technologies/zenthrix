@@ -21,6 +21,7 @@ extern "C" {
 typedef struct zx_graph zx_graph_t;
 typedef struct zx_memory_plan zx_memory_plan_t;
 typedef struct zx_pass_manager zx_pass_manager_t;
+typedef struct zx_executor zx_executor_t;
 
 typedef enum zx_status {
   ZX_STATUS_OK = 0,
@@ -96,6 +97,15 @@ ZENTHRIX_API zx_status_t zx_file_save(
 ZENTHRIX_API zx_status_t zx_file_load(
     const char* file_path, zx_graph_t** out_graph,
     zx_memory_plan_t** out_plan);
+
+ZENTHRIX_API zx_executor_t* zx_executor_create(
+    const zx_graph_t* graph, const zx_memory_plan_t* plan);
+ZENTHRIX_API void zx_executor_destroy(zx_executor_t* executor);
+ZENTHRIX_API zx_status_t zx_executor_set_tensor_data(
+    zx_executor_t* executor, size_t tensor_index, const void* data, size_t size);
+ZENTHRIX_API zx_status_t zx_executor_get_tensor_data(
+    const zx_executor_t* executor, size_t tensor_index, void* data, size_t size);
+ZENTHRIX_API zx_status_t zx_executor_run(zx_executor_t* executor);
 
 ZENTHRIX_API const char* zx_last_error(void);
 

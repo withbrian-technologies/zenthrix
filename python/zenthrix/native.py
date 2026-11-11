@@ -60,6 +60,10 @@ class _CPassManager(ctypes.Structure):
     pass
 
 
+class _CExecutor(ctypes.Structure):
+    pass
+
+
 class _CAllocation(ctypes.Structure):
     _fields_: ClassVar[list[tuple[str, type[ctypes.c_size_t]]]] = [
         ("tensor_index", ctypes.c_size_t),
@@ -260,6 +264,34 @@ def _configure_library_signatures(lib: ctypes.CDLL) -> None:
         ctypes.POINTER(ctypes.POINTER(_CGraph)),
         ctypes.POINTER(ctypes.POINTER(_CMemoryPlan)),
     ]
+
+    lib.zx_executor_create.restype = ctypes.POINTER(_CExecutor)
+    lib.zx_executor_create.argtypes = [
+        ctypes.POINTER(_CGraph),
+        ctypes.POINTER(_CMemoryPlan),
+    ]
+
+    lib.zx_executor_destroy.restype = None
+    lib.zx_executor_destroy.argtypes = [ctypes.POINTER(_CExecutor)]
+
+    lib.zx_executor_set_tensor_data.restype = ctypes.c_int
+    lib.zx_executor_set_tensor_data.argtypes = [
+        ctypes.POINTER(_CExecutor),
+        ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_size_t,
+    ]
+
+    lib.zx_executor_get_tensor_data.restype = ctypes.c_int
+    lib.zx_executor_get_tensor_data.argtypes = [
+        ctypes.POINTER(_CExecutor),
+        ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_size_t,
+    ]
+
+    lib.zx_executor_run.restype = ctypes.c_int
+    lib.zx_executor_run.argtypes = [ctypes.POINTER(_CExecutor)]
 
 
 def _check_status(lib: ctypes.CDLL, status: int) -> None:
@@ -535,4 +567,84 @@ class NativePassManager:
     def run(self, graph: NativeGraph) -> bool:
         """Run all registered passes on the graph."""
         status = self._lib.zx_pass_manager_run(self._handle, graph._handle)
+        return bool(status == STATUS_OK)
+
+
+class NativeExecutor:
+    """Numerical execution engine evaluating graphs over memory arenas."""
+
+    def __init__(
+        self,
+        graph: NativeGraph,
+        plan: NativeMemoryPlan | None = None,
+    ) -> None:
+        self._lib = get_native_library()
+        self._graph = graph
+        self._plan = plan if plan is not None else graph.plan_memory(64)
+
+        plan_handle = ctypes.POINTER(_CMemoryPlan)()
+        status = self._lib.zx_graph_plan_memory(
+            graph._handle, ctypes.c_size_t(64), ctypes.byref(plan_handle)
+        )
+        _check_status(self._lib, status)
+
+        try:
+            self._handle = self._lib.zx_executor_create(
+                graph._handle, plan_handle
+            )
+            if not self._handle:
+                raise ZenthrixError("Failed to create native executor")
+        finally:
+            self._lib.zx_memory_plan_destroy(plan_handle)
+
+    def __del__(self) -> None:
+        if getattr(self, "_handle", None) and getattr(self, "_lib", None):
+            self._lib.zx_executor_destroy(self._handle)
+            self._handle = None
+
+    def set_tensor_data(
+        self, tensor_index: int, data: bytes | Sequence[float]
+    ) -> None:
+        """Set raw bytes or float values into the tensor's arena buffer."""
+        import struct
+
+        if isinstance(data, (bytes, bytearray)):
+            raw_bytes = bytes(data)
+        else:
+            raw_bytes = struct.pack(f"<{len(data)}f", *data)
+
+        buf = (ctypes.c_char * len(raw_bytes)).from_buffer_copy(raw_bytes)
+        status = self._lib.zx_executor_set_tensor_data(
+            self._handle,
+            ctypes.c_size_t(tensor_index),
+            ctypes.cast(buf, ctypes.c_void_p),
+            ctypes.c_size_t(len(raw_bytes)),
+        )
+        _check_status(self._lib, status)
+
+    def get_tensor_data(self, tensor_index: int, byte_size: int) -> bytes:
+        """Retrieve output tensor data from the arena buffer as bytes."""
+        buf = (ctypes.c_char * byte_size)()
+        status = self._lib.zx_executor_get_tensor_data(
+            self._handle,
+            ctypes.c_size_t(tensor_index),
+            ctypes.cast(buf, ctypes.c_void_p),
+            ctypes.c_size_t(byte_size),
+        )
+        _check_status(self._lib, status)
+        return bytes(buf)
+
+    def get_tensor_floats(
+        self, tensor_index: int, count: int
+    ) -> tuple[float, ...]:
+        """Retrieve tensor data as a tuple of floats."""
+        import struct
+
+        raw = self.get_tensor_data(tensor_index, count * 4)
+        result: tuple[float, ...] = struct.unpack(f"<{count}f", raw)
+        return result
+
+    def run(self) -> bool:
+        """Execute the graph."""
+        status = self._lib.zx_executor_run(self._handle)
         return bool(status == STATUS_OK)

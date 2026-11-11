@@ -12,11 +12,22 @@ std::vector<TensorLifetime> analyze_lifetimes(const core::Graph& graph) {
   const auto order = graph.topological_order();
   std::vector<TensorLifetime> lifetimes;
   std::vector<bool> seen(graph.tensor_count(), false);
+
+  std::vector<bool> produced(graph.tensor_count(), false);
+  for (const auto node_idx : order) {
+    for (const auto out : graph.node(node_idx).outputs) {
+      if (out < produced.size()) {
+        produced[out] = true;
+      }
+    }
+  }
+
   for (std::size_t execution = 0; execution < order.size(); ++execution) {
     const auto& node = graph.node(order[execution]);
     for (const auto tensor : node.inputs) {
       if (!seen[tensor]) {
-        lifetimes.push_back({tensor, execution, execution});
+        const std::size_t start = produced[tensor] ? execution : 0;
+        lifetimes.push_back({tensor, start, execution});
         seen[tensor] = true;
       } else {
         for (auto& lifetime : lifetimes) {

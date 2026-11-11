@@ -7,6 +7,7 @@ option(ENABLE_TESTS "Build portable kernel tests" ON)
 add_library(zenthrix_kernels
   src/common/kernel_registry.cpp
   src/common/backend_seams.cpp
+  src/cpu/reference_kernels.cpp
 )
 target_compile_features(zenthrix_kernels PUBLIC cxx_std_20)
 target_include_directories(zenthrix_kernels PUBLIC include)

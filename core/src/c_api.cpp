@@ -13,6 +13,7 @@
 #include "zenthrix/passes/dead_code_elimination.h"
 #include "zenthrix/passes/pass_manager.h"
 #include "zenthrix/zx_format.h"
+#include "zenthrix/core/executor.h"
 
 struct zx_graph {
   zenthrix::core::Graph graph;
@@ -24,6 +25,10 @@ struct zx_memory_plan {
 
 struct zx_pass_manager {
   zenthrix::passes::PassManager pm;
+};
+
+struct zx_executor {
+  zenthrix::core::Executor executor;
 };
 
 namespace {
@@ -362,6 +367,83 @@ zx_status_t zx_file_load(const char* file_path, zx_graph_t** out_graph,
     return fail(ZX_STATUS_INTERNAL_ERROR, error.what());
   } catch (...) {
     return fail(ZX_STATUS_INTERNAL_ERROR, "failed to load .zx file");
+  }
+}
+
+zx_executor_t* zx_executor_create(const zx_graph_t* graph,
+                                 const zx_memory_plan_t* plan) {
+  clear_error();
+  if (check_graph(graph) != ZX_STATUS_OK || plan == nullptr) {
+    fail(ZX_STATUS_INVALID_ARGUMENT, "graph and plan arguments must not be null");
+    return nullptr;
+  }
+  try {
+    return new zx_executor{zenthrix::core::Executor(graph->graph, plan->plan)};
+  } catch (const std::exception& error) {
+    fail(ZX_STATUS_INTERNAL_ERROR, error.what());
+    return nullptr;
+  } catch (...) {
+    fail(ZX_STATUS_INTERNAL_ERROR, "failed to create executor");
+    return nullptr;
+  }
+}
+
+void zx_executor_destroy(zx_executor_t* executor) {
+  delete executor;
+}
+
+zx_status_t zx_executor_set_tensor_data(zx_executor_t* executor,
+                                       const size_t tensor_index,
+                                       const void* data, const size_t size) {
+  clear_error();
+  if (executor == nullptr || data == nullptr) {
+    return fail(ZX_STATUS_INVALID_ARGUMENT,
+                "executor and data must not be null");
+  }
+  try {
+    executor->executor.set_tensor_data(tensor_index, data, size);
+    return ZX_STATUS_OK;
+  } catch (const std::out_of_range& error) {
+    return fail(ZX_STATUS_OUT_OF_RANGE, error.what());
+  } catch (const std::invalid_argument& error) {
+    return fail(ZX_STATUS_INVALID_ARGUMENT, error.what());
+  } catch (const std::exception& error) {
+    return fail(ZX_STATUS_INTERNAL_ERROR, error.what());
+  }
+}
+
+zx_status_t zx_executor_get_tensor_data(const zx_executor_t* executor,
+                                       const size_t tensor_index,
+                                       void* data, const size_t size) {
+  clear_error();
+  if (executor == nullptr || data == nullptr) {
+    return fail(ZX_STATUS_INVALID_ARGUMENT,
+                "executor and data must not be null");
+  }
+  try {
+    executor->executor.get_tensor_data(tensor_index, data, size);
+    return ZX_STATUS_OK;
+  } catch (const std::out_of_range& error) {
+    return fail(ZX_STATUS_OUT_OF_RANGE, error.what());
+  } catch (const std::invalid_argument& error) {
+    return fail(ZX_STATUS_INVALID_ARGUMENT, error.what());
+  } catch (const std::exception& error) {
+    return fail(ZX_STATUS_INTERNAL_ERROR, error.what());
+  }
+}
+
+zx_status_t zx_executor_run(zx_executor_t* executor) {
+  clear_error();
+  if (executor == nullptr) {
+    return fail(ZX_STATUS_INVALID_ARGUMENT, "executor must not be null");
+  }
+  try {
+    if (!executor->executor.execute()) {
+      return fail(ZX_STATUS_INTERNAL_ERROR, "graph execution failed");
+    }
+    return ZX_STATUS_OK;
+  } catch (const std::exception& error) {
+    return fail(ZX_STATUS_INTERNAL_ERROR, error.what());
   }
 }
 

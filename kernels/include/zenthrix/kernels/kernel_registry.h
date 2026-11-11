@@ -11,6 +11,7 @@ namespace zenthrix::kernels {
 struct KernelDescriptor {
   KernelKey key;
   std::string name;
+  KernelFn fn{nullptr};
 };
 
 class KernelRegistry {

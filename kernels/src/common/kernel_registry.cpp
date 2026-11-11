@@ -69,6 +69,10 @@ Status validate(const KernelKey& key) {
     case Operation::matmul:
     case Operation::rms_norm:
     case Operation::fused_attention:
+    case Operation::elementwise_add:
+    case Operation::silu:
+    case Operation::gelu:
+    case Operation::identity:
       break;
     default:
       return {StatusCode::invalid_descriptor, "unsupported kernel operation"};

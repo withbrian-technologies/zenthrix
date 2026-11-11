@@ -5,12 +5,14 @@ from .exceptions import EngineUnavailableError, InputValidationError, ZenthrixEr
 from .metadata import ModelMetadata, TensorInfo
 from .native import (
     NativeAllocation,
+    NativeExecutor,
     NativeGraph,
     NativeMemoryPlan,
     NativePassManager,
     get_native_version,
     is_native_available,
 )
+from .runtime import CpuReferenceRuntime
 from .zx_format import (
     ZxModelInfo,
     is_zx_file,
@@ -21,12 +23,14 @@ from .zx_format import (
 __version__ = "0.2.3"
 
 __all__ = [
+    "CpuReferenceRuntime",
     "Engine",
     "EngineUnavailableError",
     "InferenceResult",
     "InputValidationError",
     "ModelMetadata",
     "NativeAllocation",
+    "NativeExecutor",
     "NativeGraph",
     "NativeMemoryPlan",
     "NativePassManager",
