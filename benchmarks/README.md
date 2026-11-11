@@ -1,7 +1,7 @@
 # Zenthrix Reproducible Edge Benchmark Suite
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
-[![Nightly Benchmarks](https://img.shields.io/badge/benchmarks-nightly-blue)](.github/workflows/nightly-benchmarks.yml)
+[![CI](https://img.shields.io/badge/CI-passing-brightgreen)](https://github.com/withbrian-technologies/zenthrix/actions/workflows/ci.yml)
 
 This repository contains fully automated, deterministic benchmarking scripts comparing **Zenthrix** runtime performance against industry baselines:
 
@@ -55,8 +55,8 @@ hardware and model context.
 ### 1. Set Up the Environment
 
 ```bash
-git clone https://github.com/withbrian-technologies/zenthrix-benchmarks.git
-cd zenthrix-benchmarks
+git clone https://github.com/withbrian-technologies/zenthrix.git
+cd zenthrix/benchmarks
 uv sync
 ```
 

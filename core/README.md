@@ -1,11 +1,12 @@
 # Zenthrix Core Engine
 
-> **Proprietary & Confidential**
-> Copyright (c) 2026 WithBrian Technologies. All Rights Reserved.
-> This repository contains trade secret intellectual property. Unauthorized cloning, inspection, or distribution is strictly prohibited.
+Copyright (c) 2026 WithBrian Technologies.
 
-**Visibility:** Private
-**Role:** Core intermediate representation (IR), graph rewrite passes, memory planning, and operator fusion engine.
+**Role:** Core intermediate representation (IR), graph rewrite passes, memory
+planning, and operator fusion engine.
+
+This component is part of the Zenthrix monorepo and is distributed under the
+[Apache License 2.0](../LICENSE).
 
 **Interop:** A stable C ABI is provided in `include/zenthrix/c_api.h` for
 Python bindings, platform runtimes, and other native clients. The C ABI is the
@@ -27,7 +28,10 @@ supported cross-language boundary; the implementation remains C++20.
 
 ## Architectural Overview
 
-`zenthrix-core` is the proprietary graph compilation engine for the Zenthrix ecosystem. It translates high-level compute representations (ONNX, TorchScript, StableHLO) into a flattened, fully optimized Zenthrix Intermediate Representation (**Zenthrix-IR**) designed for immediate low-level code generation.
+`zenthrix-core` is the graph compilation engine for the Zenthrix ecosystem. It
+translates high-level compute representations (ONNX, TorchScript, StableHLO)
+into a flattened, optimized Zenthrix Intermediate Representation
+(**Zenthrix-IR**) designed for immediate low-level code generation.
 
 ## Primary Compilation Stages
 
@@ -83,7 +87,7 @@ ctest --test-dir build --output-on-failure
 ## Repository Layout
 
 ```
-zenthrix-core/
+core/
 ├── cmake/
 │   └── Sanitizers.cmake
 ├── docs/
@@ -135,7 +139,8 @@ zenthrix-core/
 └── README.md
 ```
 
-## IP Quarantine and Diligence Integrity
+## Development Integrity
 
-- **Strict License Boundary** — This repository must not link to, copy, or incorporate code governed by copyleft licenses (GPL, AGPL, SSPL, or LGPL). All third-party dependencies are restricted to approved, permissively licensed libraries (Apache 2.0, MIT, or 3-Clause BSD) located under `third_party/`.
+- **License Boundary** — Keep third-party dependencies compatible with the
+  Apache License 2.0 and document their licenses.
 - **Commit Authorship** — All git commits must be signed using corporate GPG keys registered to an authenticated `@withbrian.com` account.

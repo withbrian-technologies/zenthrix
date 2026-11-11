@@ -16,6 +16,7 @@ Zenthrix is an edge-native model compiler frontend for compiling open-weight neu
 - [Key Features](#key-features)
 - [Installation](#installation)
 - [Quickstart](#quickstart)
+- [Monorepo Layout](#monorepo-layout)
 - [Supported Target Architectures](#supported-target-architectures)
 - [Changelog](CHANGELOG.md)
 - [Contributing](#contributing)
@@ -173,6 +174,33 @@ Malformed configuration is reported as a CLI error.
 | Qualcomm Snapdragon (8 Gen 2/3/4) | Hexagon HTP Architecture (C++) | NPU / HVX |
 | Arm Neoverse / Cortex | Arm NEON / SVE2 Assembly | CPU Vector Extensions |
 
+## Monorepo Layout
+
+The public frontend and native components live in one repository. The
+`core/`, `kernels/`, and `benchmarks/` directories are imported with their
+full Git histories preserved as subtree merges.
+
+| Directory | Purpose | Primary build |
+|---|---|---|
+| `python/zenthrix` | Python API, CLI, adapters, and runtime boundary | `uv` |
+| `core/` | Graph IR, compiler passes, and memory planning | CMake/C++20 |
+| `kernels/` | Portable kernel ABI and backend registry | CMake/C++20 |
+| `benchmarks/` | Reproducible result validation and reporting | `uv` |
+
+Run the complete local validation set:
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run mypy python
+cmake -S core -B build/core -DENABLE_TESTS=ON
+cmake --build build/core
+ctest --test-dir build/core --output-on-failure
+cmake -S kernels -B build/kernels -DENABLE_TESTS=ON
+cmake --build build/kernels
+ctest --test-dir build/kernels --output-on-failure
+```
+
 ## Contributing
 
 We welcome community contributions to adapters, loaders, and frontend parsers. All contributions require signing our Contributor License Agreement (CLA) during the pull request process.
@@ -181,4 +209,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for local environment setup instructions.
 
 ## License
 
-The Zenthrix CLI and client adapters are distributed under the [Apache License 2.0](LICENSE). The underlying compilation engine dynamic binary is subject to the WithBrian Technologies Commercial EULA embedded in binary distributions.
+All Zenthrix source code, native components, benchmark tooling, and
+documentation in this repository are distributed under the
+[Apache License 2.0](LICENSE).

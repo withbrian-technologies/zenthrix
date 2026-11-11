@@ -25,3 +25,34 @@ jobs:
       - run: python -m pytest
       - run: python -m build
 
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test core
+        run: |
+          cmake -S core -B build/core -DENABLE_TESTS=ON
+          cmake --build build/core
+          ctest --test-dir build/core --output-on-failure
+      - name: Build and test kernels
+        run: |
+          cmake -S kernels -B build/kernels -DENABLE_TESTS=ON
+          cmake --build build/kernels
+          ctest --test-dir build/kernels --output-on-failure
+
+  benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install pytest ruff mypy
+      - run: python -m pip install -e benchmarks
+      - working-directory: benchmarks
+        run: |
+          python -m ruff check .
+          python -m mypy python
+          python -m pytest
+          zbench validate examples/results.json

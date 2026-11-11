@@ -1,11 +1,12 @@
 # Zenthrix Silicon Kernels
 
-> **Proprietary & Confidential**
-> Copyright (c) 2026 WithBrian Technologies. All Rights Reserved.
-> Contains proprietary, low-level microcode, assembly kernels, and device drivers for edge neural acceleration.
+Copyright (c) 2026 WithBrian Technologies.
 
-**Visibility:** Private
-**Role:** Hardware-specific backends and low-level compute intrinsics (Apple Metal/AMX, Qualcomm Hexagon HVX/HTP).
+**Role:** Hardware-specific backends and low-level compute intrinsics (Apple
+Metal/AMX, Qualcomm Hexagon HVX/HTP).
+
+This component is part of the Zenthrix monorepo and is distributed under the
+[Apache License 2.0](../LICENSE).
 
 ---
 
@@ -29,8 +30,11 @@
 ### 1. Apple Silicon Engine (`targets/apple`)
 
 - Direct low-level pipeline interfacing with the Apple Metal 3 API via Objective-C++.
-- Proprietary Metal Shading Language (`.metal`) routines implementing fused Key-Value Cache + FlashAttention-2 operations.
-- Proprietary Apple Matrix Coprocessor (AMX) assembly routines targeting direct register-level GEMM (General Matrix Multiply) operations on M-series and A-series performance cores.
+- Metal Shading Language (`.metal`) routines implementing fused Key-Value Cache
+  + FlashAttention-2 operations.
+- Apple Matrix Coprocessor (AMX) assembly routines targeting direct
+  register-level GEMM (General Matrix Multiply) operations on M-series and
+  A-series performance cores.
 
 ### 2. Qualcomm Hexagon Engine (`targets/qualcomm`)
 
@@ -58,7 +62,7 @@ macOS/Xcode toolchain and physical Apple Silicon hardware.
 ## Repository Layout
 
 ```
-zenthrix-kernels/
+kernels/
 ├── docs/
 │   └── KERNEL_ABI.md
 ├── include/zenthrix/kernels/
@@ -79,7 +83,9 @@ The Apple and Qualcomm target directories described above are future
 platform-specific additions; the current portable target intentionally has no
 vendor SDK dependency.
 
-## Acquisition Due Diligence Requirements
+## Development Integrity
 
-- **No Proprietary Reverse Engineering** — No undocumented, private OS APIs subject to non-disclosure restrictions may be accessed without explicit public header support or a documented fallback execution path.
+- **Clean-Room Implementation** — No undocumented private OS APIs or
+  reverse-engineered code may be used. Keep platform-specific implementations
+  within documented public API boundaries.
 - **Clean Room Implementation** — All hand-tuned assembly and microcode routines must be clean-room developed by authenticated WithBrian Technologies engineering staff. Third-party decompilation or reverse-engineered code is strictly forbidden.
