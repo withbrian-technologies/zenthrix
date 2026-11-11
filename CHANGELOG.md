@@ -5,6 +5,16 @@ All notable changes to Zenthrix are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Merged the core engine, silicon kernels, and benchmark suite into the
+  monorepo with full Git history preserved through subtree merge commits.
+- Added aggregate CI coverage for the Python frontend, native C++ components,
+  and benchmark validation.
+- Relicensed all monorepo source, tooling, and documentation under Apache 2.0.
+
 ## [0.2.2] - 2026-11-10
 
 ### Added
