@@ -84,6 +84,9 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
+The test suite includes both C++ IR coverage and C ABI boundary coverage,
+including invalid argument and error-reporting behavior.
+
 ## Repository Layout
 
 ```

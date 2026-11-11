@@ -37,7 +37,7 @@ uv run python -m build
 
 The public package validates model inputs and exposes the CLI/API boundary.
 The native compiler components are in `core/` and `kernels/`; benchmark tooling
-is in `benchmarks/`. Run their CMake and benchmark checks before opening a PR
-when those areas change.
+is in `benchmarks/`. Run the root CMake and benchmark checks before opening a
+PR when those areas change.
 
 The repository is licensed under the Apache License 2.0.

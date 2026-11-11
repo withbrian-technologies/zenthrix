@@ -29,16 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build and test core
+      - name: Configure native monorepo
         run: |
-          cmake -S core -B build/core -DENABLE_TESTS=ON
-          cmake --build build/core
-          ctest --test-dir build/core --output-on-failure
-      - name: Build and test kernels
+          cmake -S . -B build/native -DZENTHRIX_BUILD_TESTS=ON
+      - name: Build native monorepo
         run: |
-          cmake -S kernels -B build/kernels -DENABLE_TESTS=ON
-          cmake --build build/kernels
-          ctest --test-dir build/kernels --output-on-failure
+          cmake --build build/native
+      - name: Test native monorepo
+        run: ctest --test-dir build/native --output-on-failure
 
   benchmarks:
     runs-on: ubuntu-latest
