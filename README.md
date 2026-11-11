@@ -193,13 +193,12 @@ Run the complete local validation set:
 uv run pytest
 uv run ruff check .
 uv run mypy python
-cmake -S core -B build/core -DENABLE_TESTS=ON
-cmake --build build/core
-ctest --test-dir build/core --output-on-failure
-cmake -S kernels -B build/kernels -DENABLE_TESTS=ON
-cmake --build build/kernels
-ctest --test-dir build/kernels --output-on-failure
+cmake -S . -B build/native -DZENTHRIX_BUILD_TESTS=ON
+cmake --build build/native
+ctest --test-dir build/native --output-on-failure
 ```
+
+Use `-DZENTHRIX_BUILD_TESTS=OFF` for a production-only native build.
 
 ## Contributing
 

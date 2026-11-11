@@ -26,4 +26,8 @@ if(ENABLE_TESTS)
   add_executable(zenthrix_core_tests tests/unit/test_graph.cpp)
   target_link_libraries(zenthrix_core_tests PRIVATE zenthrix_core)
   add_test(NAME zenthrix_core_tests COMMAND zenthrix_core_tests)
+
+  add_executable(zenthrix_core_c_api_tests tests/unit/test_c_api.cpp)
+  target_link_libraries(zenthrix_core_c_api_tests PRIVATE zenthrix_core)
+  add_test(NAME zenthrix_core_c_api_tests COMMAND zenthrix_core_c_api_tests)
 endif()
