@@ -33,7 +33,8 @@ class NamelessPass final : public zenthrix::passes::Pass {
 
 int main() {
   assert(zx_core_version_major() == 0);
-  assert(zx_core_version_minor() == 1);
+  assert(zx_core_version_minor() == 2);
+  assert(zx_core_version_patch() == 3);
   assert(zx_graph_validate(nullptr) == ZX_STATUS_INVALID_ARGUMENT);
   assert(zx_last_error() != nullptr);
   auto* c_graph = zx_graph_create();

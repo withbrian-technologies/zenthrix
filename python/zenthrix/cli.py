@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .metadata import ModelMetadata
+    from .zx_format import ZxModelInfo
 
 from . import __version__
 from .engine import Engine
@@ -85,10 +86,21 @@ def _inspect(args: argparse.Namespace) -> int:
 
     if suffix == "zx":
         validate_compiled_model_path(model_path)
-        raise EngineUnavailableError(
-            "The Zenthrix native engine is not installed. "
-            "Install the platform runtime before inspecting compiled models."
-        )
+        from .native import is_native_available
+        from .zx_format import is_zx_file, read_zx_info
+
+        if not is_native_available() or not is_zx_file(model_path):
+            raise EngineUnavailableError(
+                "The Zenthrix native engine is not installed. "
+                "Install the platform runtime before inspecting compiled models."
+            )
+
+        zx_info = read_zx_info(model_path)
+        if args.json:
+            print(json.dumps(zx_info.to_dict()))
+        else:
+            _print_zx_info(zx_info, show_memory_profile=args.memory_profile)
+        return 0
 
     # Inspect a source model (safetensors, gguf, onnx)
     from .metadata import extract_metadata
@@ -100,6 +112,44 @@ def _inspect(args: argparse.Namespace) -> int:
     else:
         _print_metadata(meta)
     return 0
+
+
+def _print_zx_info(info: ZxModelInfo, *, show_memory_profile: bool = False) -> None:
+    """Pretty-print compiled .zx model metadata and memory profile."""
+    lines = [
+        "",
+        f"  Compiled Model: {info.path}",
+        "  Format:         Zenthrix Executable (.zx v1.0)",
+        f"  Target Silicon: {info.target_arch}",
+        f"  File size:      {_format_size(info.file_size_bytes)}",
+    ]
+    if info.parameter_count:
+        lines.append(f"  Parameters:     {info.parameter_count:,}")
+    if info.arena_size_bytes:
+        arena_mb = info.arena_size_bytes / (1024 * 1024)
+        lines.append(
+            f"  Planned Arena:  {_format_size(info.arena_size_bytes)} "
+            f"({arena_mb:.2f} MB)"
+        )
+    lines.append(f"  Tensors:        {info.tensor_count}")
+    lines.append(f"  Compute Nodes:  {info.node_count}")
+
+    if show_memory_profile and info.tensors:
+        lines.append("")
+        lines.append("  Memory Arena Profile:")
+        lines.append(
+            f"    {'Offset':<12} {'Size':<10} {'Type':<8} {'Shape':<16} Tensor Name"
+        )
+        lines.append(f"    {'-'*12} {'-'*10} {'-'*8} {'-'*16} {'-'*20}")
+        for t in info.tensors:
+            shape_str = f"[{'x'.join(str(d) for d in t.shape)}]"
+            lines.append(
+                f"    {t.arena_offset:<12} {_format_size(t.arena_size):<10} "
+                f"{t.dtype:<8} {shape_str:<16} {t.name}"
+            )
+
+    lines.append("")
+    print("\n".join(lines))
 
 
 def _print_metadata(meta: ModelMetadata) -> None:

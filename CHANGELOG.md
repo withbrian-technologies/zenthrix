@@ -5,6 +5,20 @@ All notable changes to Zenthrix are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Added a unified `libzenthrix` shared library combining `core` and `kernels`.
+- Added expanded C ABI endpoints for memory arena planning, pass manager
+  pipeline execution, kernel backend capabilities, and file serialization.
+- Added relocatable `.zx` binary format (v1.0) container specification, C++
+  serializer/deserializer, and Python reader/writer.
+- Added zero-dependency `ctypes` bridge in `zenthrix.native` exposing
+  `NativeGraph`, `NativeMemoryPlan`, and `NativePassManager`.
+- Added compiled model inspection for `.zx` files in `zenthrix inspect` with
+  `--memory-profile` and `--json` support.
+
 ## [0.2.3] - 2026-11-11
 
 ### Added

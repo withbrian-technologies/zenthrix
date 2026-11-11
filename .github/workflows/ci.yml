@@ -22,6 +22,10 @@ jobs:
       - run: python -m pip install -e .
       - run: python -m ruff check .
       - run: python -m mypy python
+      - name: Build native library for testing
+        run: |
+          cmake -S . -B build/native -DZENTHRIX_BUILD_TESTS=OFF
+          cmake --build build/native
       - run: python -m pytest
       - run: python -m build
 
