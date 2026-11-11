@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(zenthrix VERSION 0.2.2 LANGUAGES CXX)
+project(zenthrix VERSION 0.2.3 LANGUAGES CXX)
 
 option(ZENTHRIX_BUILD_TESTS "Build native component tests" ON)
 

@@ -5,15 +5,21 @@ All notable changes to Zenthrix are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.2.3] - 2026-11-11
 
 ### Added
 
-- Merged the core engine, silicon kernels, and benchmark suite into the
-  monorepo with full Git history preserved through subtree merge commits.
-- Added aggregate CI coverage for the Python frontend, native C++ components,
-  and benchmark validation.
-- Relicensed all monorepo source, tooling, and documentation under Apache 2.0.
+- Added a unified root CMake build for the native core and kernels components.
+- Added C API regression coverage for lifecycle, validation, status, and error
+  handling.
+- Added aggregate CI coverage for Python, native C++, and benchmark validation.
+
+### Changed
+
+- Unified the core engine, silicon kernels, and benchmark suite in the monorepo
+  with full Git history preserved through subtree merge commits.
+- Relicensed monorepo source, tooling, and documentation under Apache 2.0.
+- Bumped the package, API, and native project version to `0.2.3`.
 
 ## [0.2.2] - 2026-11-10
 
@@ -120,3 +126,4 @@ and this project follows [Semantic Versioning](https://semver.org/).
 [0.2.0]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.0
 [0.2.1]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.1
 [0.2.2]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.2
+[0.2.3]: https://github.com/withbrian-technologies/zenthrix/releases/tag/v0.2.3
