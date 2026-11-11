@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "timestamp": "2026-09-18T00:00:00Z",
+    "commit": "example",
+    "environment": "Apple M3 Max, macOS 14.5",
+    "configuration": "context=512, generated=128, quantization=int4"
+  },
+  "results": [
+    {
+      "implementation": "zenthrix",
+      "hardware": "Apple M3 Max",
+      "model": "Llama-3.2-1B-Instruct",
+      "metrics": {
+        "ttft_ms": 18.7,
+        "tokens_per_second": 94.6,
+        "peak_memory_mb": 839.68,
+        "load_time_ms": 44.0
+      }
+    }
+  ]
+}

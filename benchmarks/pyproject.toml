@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "zenthrix-benchmarks"
+version = "0.1.0"
+description = "Reproducible benchmark result validation and reporting for Zenthrix"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "WithBrian Technologies" }]
+dependencies = []
+
+[dependency-groups]
+dev = ["build", "mypy", "pytest", "ruff"]
+
+[project.scripts]
+zbench = "zenthrix_benchmarks.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/zenthrix_benchmarks"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["python"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+mypy_path = "python"
