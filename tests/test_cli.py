@@ -109,7 +109,7 @@ def test_inspect_gguf_reports_tensor_count(capsys, tmp_path: Path) -> None:
     import struct
 
     model = tmp_path / "model.gguf"
-    model.write_bytes(struct.pack("<IIQQ", 0x46475547, 3, 7, 0))
+    model.write_bytes(struct.pack("<IIQQ", 0x46554747, 3, 7, 0))
 
     assert main(["inspect", str(model), "--json"]) == 0
     payload = json.loads(capsys.readouterr().out)

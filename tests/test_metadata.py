@@ -90,7 +90,7 @@ class TestExtractSafetensorsMetadata:
 
 # -- GGUF fixtures & tests ---------------------------------------------------
 
-_GGUF_MAGIC = 0x46475547
+_GGUF_MAGIC = 0x46554747
 
 
 def _write_gguf(path, version=3, tensor_count=5, architecture="llama"):
