@@ -68,15 +68,28 @@ def _compile(args: argparse.Namespace) -> int:
             "compile requires --output or output in zenthrix.toml"
         )
     validate_model_input(args.model, args.model_format)
-    validate_compile_options(
-        args.target if args.target is not None else "auto",
-        args.quantization,
-        args.output,
-    )
-    raise ZenthrixError(
-        "The native compiler engine is not installed. "
-        "The public frontend cannot produce a .zx binary yet."
-    )
+    target = args.target if args.target is not None else "auto"
+    validate_compile_options(target, args.quantization, args.output)
+
+    from .compiler import compile_model
+    from .native import is_native_available
+
+    if not is_native_available():
+        raise ZenthrixError(
+            "The native compiler engine is not installed. "
+            "The public frontend cannot produce a .zx binary yet."
+        )
+
+    result = compile_model(args.model, args.output, target=target)
+    if args.json:
+        print(json.dumps(result.to_dict()))
+    else:
+        print(
+            f"Compiled {result.output_path} "
+            f"(target={result.target}, arena={_format_size(result.arena_size_bytes)}, "
+            f"tensors={result.tensor_count}, nodes={result.node_count})"
+        )
+    return 0
 
 
 def _inspect(args: argparse.Namespace) -> int:
