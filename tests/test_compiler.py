@@ -9,6 +9,7 @@ from pathlib import Path
 from zenthrix.cli import main
 from zenthrix.compiler import compile_model
 from zenthrix.native import is_native_available
+from zenthrix.runtime import CpuReferenceRuntime
 from zenthrix.zx_format import is_zx_file, read_zx_info
 
 
@@ -72,3 +73,24 @@ def test_cli_compile_json_roundtrip(tmp_path: Path, capsys) -> None:  # type: ig
     assert payload["format"] == "safetensors"
     assert payload["arena_size_bytes"] > 0
     assert is_zx_file(out)
+
+
+def test_compile_and_execute_cpu_runtime(tmp_path: Path) -> None:
+    if not is_native_available():
+        return
+    src = tmp_path / "model.safetensors"
+    out = tmp_path / "exec.zx"
+    _write_min_safetensors(src)
+
+    res = compile_model(src, out, target="cpu")
+    assert res.node_count == 4
+
+    runtime = CpuReferenceRuntime()
+    result = runtime.generate(
+        out, "Run native arena check", temperature=0.2, max_tokens=32
+    )
+    assert "Run native arena check" in result.text
+    assert "nodes=4" in result.text
+    assert "out_sample=[" in result.text
+    assert result.ttft_ms > 0
+    assert result.tokens_per_second > 0

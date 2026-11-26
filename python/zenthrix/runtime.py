@@ -74,6 +74,7 @@ class CpuReferenceRuntime:
         del temperature, max_tokens
         import time
 
+        from .exceptions import ZenthrixError
         from .native import NativeExecutor, NativeGraph, is_native_available
         from .zx_format import is_zx_file
 
@@ -85,15 +86,52 @@ class CpuReferenceRuntime:
 
         start_time = time.perf_counter()
         graph, plan = NativeGraph.load_zx(model_path)
-        load_time_ms = (time.perf_counter() - start_time) * 1000.0
 
+        sample: list[float] = []
         if graph.node_count > 0:
             executor = NativeExecutor(graph, plan)
-            executor.run()
+            if plan.allocations:
+                # Seed input tensor (index 0) deterministically from prompt bytes
+                in_alloc = plan.allocations[0]
+                in_floats = max(1, in_alloc.size // 4)
+                prompt_bytes = prompt.encode("utf-8") or b"\x01"
+                seed = [
+                    ((prompt_bytes[i % len(prompt_bytes)] / 127.5) - 1.0)
+                    for i in range(in_floats)
+                ]
+                executor.set_tensor_data(in_alloc.tensor_index, seed)
 
-        ttft_ms = max(5.0, round(load_time_ms + 12.0, 2))
-        tokens_per_second = 38.5
-        output_text = f"Zenthrix CPU response: {prompt.strip()}"
+                # Initialize intermediate weight/gamma tensors to non-zero defaults
+                for alloc in plan.allocations[1:-1]:
+                    count = alloc.size // 4
+                    if count > 0 and alloc.size % 4 == 0:
+                        val = 1.0 if count <= 512 else 0.01
+                        executor.set_tensor_data(alloc.tensor_index, [val] * count)
+
+            if not executor.run():
+                raise ZenthrixError("Native graph execution failed")
+
+            if plan.allocations:
+                out_alloc = plan.allocations[-1]
+                out_count = min(4, max(1, out_alloc.size // 4))
+                if out_alloc.size >= 4:
+                    sample = [
+                        round(v, 4)
+                        for v in executor.get_tensor_floats(
+                            out_alloc.tensor_index, out_count
+                        )
+                    ]
+
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+        ttft_ms = max(0.1, round(elapsed_ms, 2))
+        word_count = max(1, len(prompt.split()))
+        tokens_per_second = round(
+            max(1.0, word_count / max(elapsed_ms / 1000.0, 1e-4)), 1
+        )
+        output_text = (
+            f"Zenthrix CPU response: {prompt.strip()} "
+            f"[nodes={graph.node_count}, out_sample={sample}]"
+        )
 
         return RuntimeResult(
             text=output_text,

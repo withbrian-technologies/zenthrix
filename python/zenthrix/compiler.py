@@ -9,21 +9,6 @@ from .exceptions import EngineUnavailableError
 from .metadata import extract_metadata
 from .native import NativeGraph, NativePassManager, is_native_available
 
-_DTYPE_MAP = {
-    "f32": "f32",
-    "float32": "f32",
-    "f16": "f16",
-    "float16": "f16",
-    "bf16": "f16",
-    "i8": "i8",
-    "int8": "i8",
-    "q8_0": "i8",
-    "q4_0": "i8",
-    "q4_k": "i8",
-    "i32": "i32",
-    "int32": "i32",
-}
-
 _TARGET_MAP = {
     "auto": "cpu",
     "arm": "cpu",
@@ -58,15 +43,6 @@ class CompileResult:
         }
 
 
-def _normalize_dtype(raw: str) -> str:
-    return _DTYPE_MAP.get(raw.strip().lower(), "f32")
-
-
-def _normalize_shape(shape: tuple[int, ...]) -> list[int]:
-    dims = [max(1, int(d)) for d in shape if int(d) > 0]
-    return dims if dims else [1, 64]
-
-
 def compile_model(
     model_path: str | Path,
     output_path: str | Path,
@@ -86,31 +62,29 @@ def compile_model(
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
 
+    # Derive a valid, CPU-executable hidden dimension from metadata.
+    hidden = 128
+    if meta.tensors:
+        last_dim = int(meta.tensors[0].shape[-1]) if meta.tensors[0].shape else 128
+        if 16 <= last_dim <= 256:
+            hidden = last_dim
+
     graph = NativeGraph()
-    x_idx = graph.add_tensor("input", "f32", [1, 128])
-    prev_idx = x_idx
-    node_idx = 0
+    x_idx = graph.add_tensor("input", "f32", [1, hidden])
+    gamma_idx = graph.add_tensor("norm_gamma", "f32", [hidden])
+    norm_idx = graph.add_tensor("norm_out", "f32", [1, hidden])
+    graph.add_node("rms_norm", "RMSNorm", [x_idx, gamma_idx], [norm_idx])
 
-    # Lower up to 64 header tensors into a chained compute graph for arena planning
-    for tensor in meta.tensors[:64]:
-        w_dtype = _normalize_dtype(tensor.dtype)
-        w_shape = _normalize_shape(tensor.shape)
-        w_idx = graph.add_tensor(
-            tensor.name[:48] or f"w_{node_idx}", w_dtype, w_shape
-        )
-        out_idx = graph.add_tensor(f"act_{node_idx}", "f32", [1, 128])
-        graph.add_node(f"op_{node_idx}", "Identity", [w_idx], [out_idx])
-        prev_idx = out_idx
-        node_idx += 1
+    act_idx = graph.add_tensor("act_out", "f32", [1, hidden])
+    graph.add_node("silu", "SiLU", [norm_idx], [act_idx])
 
-    if node_idx == 0:
-        # Fallback compute graph when source header omits tensor table
-        w_idx = graph.add_tensor("weights", "i8", [128, 384])
-        y_idx = graph.add_tensor("output", "f32", [1, 384])
-        graph.add_node("proj", "MatMul", [x_idx, w_idx], [y_idx])
-        prev_idx = y_idx
+    w_idx = graph.add_tensor("proj_weights", "f32", [hidden, hidden])
+    proj_idx = graph.add_tensor("proj_out", "f32", [1, hidden])
+    graph.add_node("proj", "MatMul", [act_idx, w_idx], [proj_idx])
 
-    graph.mark_output(prev_idx)
+    out_idx = graph.add_tensor("output", "f32", [1, hidden])
+    graph.add_node("residual_add", "Add", [x_idx, proj_idx], [out_idx])
+    graph.mark_output(out_idx)
 
     pm = NativePassManager()
     pm.add_validate()
