@@ -30,6 +30,7 @@ Zenthrix is an edge-native neural graph compiler for compiling open-weight neura
 - [Project Configuration (`zenthrix.toml`)](#project-configuration)
 - [Supported Target Silicon](#supported-target-silicon)
 - [Monorepo Build & Development](#monorepo-build--development)
+- [Documentation Index](#documentation-index)
 - [Changelog](CHANGELOG.md)
 - [Contributing](#contributing)
 - [License](#license)
@@ -342,6 +343,23 @@ uv run mypy python
 uv run zbench validate examples/results.json
 uv run zbench report examples/results.json
 ```
+
+---
+
+## Documentation Index
+
+| Document | Scope |
+|---|---|
+| [Python API Reference](docs/PYTHON_API.md) | CLI, `NativeGraph`, `extract_metadata`, `zx_format`, config, exceptions |
+| [C ABI Reference](docs/C_ABI.md) | Opaque handles, `zx_status_t`, `c_api.h` functions, C example |
+| [`.zx` Format Spec](docs/ZX_FORMAT.md) | 64-byte `ZxHeader`, tensor/node tables, C++ & Python serialization |
+| [Integration Guide](docs/INTEGRATION.md) | Building `libzenthrix.so` and embedding in downstream apps |
+| [Core Architecture](core/docs/ARCHITECTURE.md) | Core dependency layers & C ABI boundary |
+| [Compilation Passes](core/docs/COMPILATION_PASSES.md) | `PassManager`, validation, dead-code elimination |
+| [Memory Planner](core/docs/MEMORY_PLANNER.md) | Tensor lifetime analysis & aligned arena packing |
+| [Graph Executor](core/docs/EXECUTOR.md) | Arena-backed execution & CPU reference operations |
+| [Portable Kernel ABI](kernels/docs/KERNEL_ABI.md) | `KernelKey`, `TensorDescriptor`, registry & silicon seams |
+| [Benchmark Suite](benchmarks/README.md) | `zbench` schemas, validation, and reporting |
 
 ---
 
