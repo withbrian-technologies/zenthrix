@@ -116,7 +116,10 @@ def test_inspect_gguf_reports_tensor_count(capsys, tmp_path: Path) -> None:
     assert payload["tensor_count"] == 7
 
 
-def test_compile_reports_missing_native_engine(tmp_path: Path, capsys) -> None:
+def test_compile_reports_missing_native_engine(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.setattr("zenthrix.native.is_native_available", lambda: False)
     model = tmp_path / "model.onnx"
     model.write_bytes(b"placeholder")
 
@@ -140,6 +143,7 @@ def test_compile_reports_missing_native_engine(tmp_path: Path, capsys) -> None:
 def test_compile_uses_config_defaults(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
+    monkeypatch.setattr("zenthrix.native.is_native_available", lambda: False)
     model = tmp_path / "model.onnx"
     model.write_bytes(b"placeholder")
     (tmp_path / "zenthrix.toml").write_text(

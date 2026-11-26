@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -58,3 +59,26 @@ jobs:
           python -m mypy python
           python -m pytest
           zbench validate examples/results.json
+
+  deploy:
+    needs: [test, native, benchmarks]
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /home/azureuser/zenthrix
+            git pull --ff-only origin main
+            cmake -S . -B build/native -DZENTHRIX_BUILD_TESTS=ON
+            cmake --build build/native -j2
+            ctest --test-dir build/native --output-on-failure
+            .venv/bin/pytest -q
+            if command -v pm2 >/dev/null 2>&1; then
+              pm2 reload nexus-ml || true
+            fi
