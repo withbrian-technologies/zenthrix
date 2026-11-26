@@ -164,7 +164,7 @@ def _parse_safetensors_header(path: Path) -> ModelMetadata:
 
 # -- GGUF parser --------------------------------------------------------------
 
-_GGUF_MAGIC = 0x46475547  # "GGUF" in little-endian
+_GGUF_MAGIC = 0x46554747  # "GGUF" in little-endian
 
 # GGUF metadata value type tags
 _GGUF_TYPE_STRING = 8
